@@ -3,6 +3,8 @@ package com.wright.android.t_minus.main_tabs.manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.support.design.widget.FloatingActionButton;
@@ -17,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
+import com.wooplr.spotlight.SpotlightView;
 import com.wright.android.t_minus.ar.ArActivity;
 import com.wright.android.t_minus.notifications.NotificationHelper;
 import com.wright.android.t_minus.objects.Manifest;
@@ -35,6 +38,7 @@ import static com.wright.android.t_minus.notifications.ShowNotificationService.C
 public class ManifestDetailsActivity extends AppCompatActivity implements GetManifestsDetailsFromAPI.OnFinished {
 
     public static final String ARG_MANIFEST = "ARG_MANIFEST";
+    private static final String AR_DETAILS_SPOTLIGHT = "AR_DETAILS_SPOTLIGHT";
     private Manifest manifest;
     private ProgressBar progressBar;
     private NotificationHelper notificationHelper;
@@ -100,11 +104,18 @@ public class ManifestDetailsActivity extends AppCompatActivity implements GetMan
     }
 
     private void setUpUi(){
-        if(!manifest.getImageUrl().equals("https://s3.amazonaws.com/launchlibrary/RocketImages/placeholder_1920.png")){
-            Picasso.get().load(manifest.getImageUrl()).fit().centerCrop()
-                    .placeholder(R.drawable.logo_outline).into((ImageView)findViewById(R.id.manifestDetailsImage));
+        ImageView imageView = findViewById(R.id.manifestDetailsImage);
+        Picasso picasso = Picasso.get();
+        if(manifest.getImageUrl() != null){
+            picasso.load(manifest.getImageUrl()).fit().centerCrop()
+                    .placeholder(R.drawable.logo_outline).into(imageView);
         }else {
-            ((ImageView)findViewById(R.id.manifestDetailsImage)).setImageDrawable(getDrawable(R.drawable.rocket_default_image));
+            if(manifest.getAgencyURL() == null){
+                imageView.setImageDrawable(getDrawable(R.drawable.rocket_default_image));
+            }else {
+                picasso.load(manifest.getAgencyURL()+"?size=700")
+                        .fit().centerCrop().placeholder(R.drawable.rocket_default_image).into(imageView);
+            }
         }
         FloatingActionButton fab = findViewById(R.id.manifestFab);
         if (manifest.getPadLocation() == null || manifest.getPadLocation().getLaunchPads()==null){
@@ -113,6 +124,26 @@ public class ManifestDetailsActivity extends AppCompatActivity implements GetMan
         }else {
             ((TextView)findViewById(R.id.detailsLocation)).setText(manifest.getPadLocation().getName());
             fab.setVisibility(View.VISIBLE);
+            new SpotlightView.Builder(this)
+                    .introAnimationDuration(400)
+                    .enableRevealAnimation(true)
+                    .performClick(true)
+                    .fadeinTextDuration(400)
+                    .headingTvColor(getColor(R.color.colorAccent))
+                    .headingTvSize(20)
+                    .headingTvText("Launch Pad Locator")
+                    .subHeadingTvColor(Color.parseColor("#ffffff"))
+                    .subHeadingTvSize(15)
+                    .subHeadingTvText("Explore your surrounding to find launch pad(s) being used for this launch.")
+                    .maskColor(Color.parseColor("#dc000000"))
+                    .target(fab)
+                    .lineAnimDuration(400)
+                    .lineAndArcColor(getColor(R.color.colorAccent))
+                    .dismissOnTouch(true)
+                    .dismissOnBackPress(true)
+                    .enableDismissAfterShown(true)
+                    .usageId(AR_DETAILS_SPOTLIGHT)
+                    .show();
             fab.setOnClickListener((View view) -> {
                 Intent intent = new Intent(this, ArActivity.class);
                 intent.putExtra(ArActivity.ARG_MANIFEST_LAUNCH_PADS, manifest.getPadLocation().getLaunchPads());
@@ -125,7 +156,9 @@ public class ManifestDetailsActivity extends AppCompatActivity implements GetMan
         final ManifestDetails manifestDetails = manifest.getManifestDetails();
         ((TextView)findViewById(R.id.detailsMissionStatus)).setText(manifestDetails.getStatus());
         if(manifestDetails.getStatus().toLowerCase().equals("launch is go")){
-            findViewById(R.id.detailsMissionStatus).setBackgroundColor(getColor(R.color.transparentGreen));
+            imageView.setForeground(getDrawable(R.drawable.go_launch_background));
+        }else{
+            imageView.setForeground(getDrawable(R.drawable.no_go_launch_background));
         }
         ((TextView)findViewById(R.id.detailsType)).setText(String.format(getString(R.string.type), manifestDetails.getType()));
         ((TextView)findViewById(R.id.detailsProbability)).setText(String.format(getString(R.string.probability), manifestDetails.getProbability()));

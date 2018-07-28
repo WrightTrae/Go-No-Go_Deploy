@@ -25,15 +25,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.wright.android.t_minus.main_tabs.Profile.ProfileMainFragment;
 import com.wright.android.t_minus.main_tabs.launchpad.LaunchPadFragment;
 import com.wright.android.t_minus.main_tabs.manifest.ManifestFragment;
-import com.wright.android.t_minus.main_tabs.map.MapBaseFragment;
 import com.wright.android.t_minus.main_tabs.photos.PhotosFragment;
-import com.wright.android.t_minus.objects.Business;
 import com.wright.android.t_minus.objects.LaunchPad;
 import com.wright.android.t_minus.objects.Manifest;
 import com.wright.android.t_minus.objects.PadLocation;
-import com.wright.android.t_minus.objects.ViewingLocation;
 import com.wright.android.t_minus.settings.PreferencesActivity;
 import com.wright.android.t_minus.network_connection.GetManifestsFromAPI;
 import com.wright.android.t_minus.network_connection.NetworkUtils;
@@ -44,8 +42,8 @@ import java.util.HashMap;
 public class MainTabbedActivity extends AppCompatActivity implements GetManifestsFromAPI.OnFinished, TabLayout.OnTabSelectedListener{
     private LaunchPadFragment launchPadFragment;
     private ManifestFragment manifestFragment;
-    private MapBaseFragment customMapFragment;
     private PhotosFragment photosFragment;
+    private ProfileMainFragment profileMainFragment;
     private ViewPager mMainViewPager;
     private DatabaseReference mDatabaseRef;
 
@@ -77,13 +75,13 @@ public class MainTabbedActivity extends AppCompatActivity implements GetManifest
         tabLayout.addOnTabSelectedListener(this);
         manifestFragment = ManifestFragment.newInstance();
         launchPadFragment = LaunchPadFragment.newInstance();
-        customMapFragment = MapBaseFragment.newInstance();
+        profileMainFragment = ProfileMainFragment.newInstance();
         photosFragment = PhotosFragment.newInstance();
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         downloadManifests();
     }
 
-    private void downloadManifests(){/////////////////Download Data\\\\\\\\\\\\\\\\\\\\
+    private void downloadManifests(){
         if(NetworkUtils.isConnected(this)){
             new GetManifestsFromAPI(this).execute();
         }else{
@@ -93,7 +91,7 @@ public class MainTabbedActivity extends AppCompatActivity implements GetManifest
     }
 
     @Override
-    public void onFinished(Manifest[] _manifests) {
+    public void onFinished(Manifest[] _manifests) {//downloadManifests Finish
         ArrayList<PadLocation> padLocations = new ArrayList<>();
         for(Manifest manifest:_manifests){
             if(manifest.getPadLocation() == null){
@@ -103,7 +101,6 @@ public class MainTabbedActivity extends AppCompatActivity implements GetManifest
                 padLocations.add(manifest.getPadLocation());
             }
         }
-        getBusinessesData();
         checkIfPadLocationExist(padLocations);
         manifestFragment.setData(_manifests);
     }
@@ -184,8 +181,6 @@ public class MainTabbedActivity extends AppCompatActivity implements GetManifest
                     }
                 }
                 launchPadFragment.setData(_padLocations);
-                customMapFragment.customMapFragment.setData(_padLocations);
-                getMapData();
             }
 
             @Override
@@ -203,69 +198,6 @@ public class MainTabbedActivity extends AppCompatActivity implements GetManifest
         padMap.put("name", launchPad.getName());
         DatabaseReference padRef = mDatabaseRef.child("launch_pads").child(String.valueOf(launchPad.getId()));
         padRef.setValue(padMap);
-    }
-
-    private void getMapData(){
-        mDatabaseRef.child("viewing_locations").addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-                String key = dataSnapshot.getKey();
-                customMapFragment.customMapFragment.removeViewingLocation(key);
-            }
-
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                customMapFragment.customMapFragment.addViewingLocation(new ViewingLocation(
-                        dataSnapshot.getKey(),
-                        (String) dataSnapshot.child("name").getValue(),
-                        (double) dataSnapshot.child("latitude").getValue(),
-                        (double) dataSnapshot.child("longitude").getValue()));
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void getBusinessesData(){
-        mDatabaseRef.child("businesses").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                ArrayList<Business> businessArrayList = new ArrayList<>();
-                for(DataSnapshot singleSnap: dataSnapshot.getChildren()){
-                    boolean verified = (boolean)singleSnap.child("isVerified").getValue();
-                    if (verified){
-                        DataSnapshot detailsSnap = singleSnap.child("details");
-                        businessArrayList.add(new Business(
-                                singleSnap.getKey(),
-                                (boolean)singleSnap.child("isVerified").getValue(),
-                                (String)detailsSnap.child("name").getValue(),
-                                (String)detailsSnap.child("number").getValue(),
-                                (double)detailsSnap.child("latitude").getValue(),
-                                (double)detailsSnap.child("longitude").getValue(),
-                                (String) detailsSnap.child("address").getValue(),
-                                (String)detailsSnap.child("description").getValue()));
-                    }
-                }
-                customMapFragment.customMapFragment.setBusinessData(businessArrayList);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
     }
 
     @Override
@@ -289,8 +221,17 @@ public class MainTabbedActivity extends AppCompatActivity implements GetManifest
     public void onTabSelected(TabLayout.Tab tab) {
         mMainViewPager.setCurrentItem(tab.getPosition());
         int tabIconColor = ContextCompat.getColor(this, R.color.selectedTabColor);
-        if(tab.getIcon()!=null)
+        if(tab.getIcon()!=null) {
             tab.getIcon().setColorFilter(tabIconColor, PorterDuff.Mode.SRC_IN);
+        }
+        switch (tab.getPosition()){
+            case 1:
+                launchPadFragment.onTabClick();
+                break;
+            case 2:
+                photosFragment.onTabClick();
+                break;
+        }
     }
 
     @Override
@@ -319,9 +260,9 @@ public class MainTabbedActivity extends AppCompatActivity implements GetManifest
                 case 1:
                     return launchPadFragment;
                 case 2:
-                    return customMapFragment;
-                case 3:
                     return photosFragment;
+                case 3:
+                    return profileMainFragment;
                 default:
                     return null;
             }

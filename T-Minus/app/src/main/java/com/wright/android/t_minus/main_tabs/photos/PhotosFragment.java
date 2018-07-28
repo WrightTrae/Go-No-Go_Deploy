@@ -2,25 +2,15 @@ package com.wright.android.t_minus.main_tabs.photos;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
-import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -30,36 +20,22 @@ import android.support.v4.content.FileProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.RequestCreator;
+import com.wooplr.spotlight.SpotlightView;
 import com.wright.android.t_minus.R;
 import com.wright.android.t_minus.objects.ImageObj;
-import com.wright.android.t_minus.objects.PadLocation;
 import com.wright.android.t_minus.settings.PreferencesActivity;
 
 import java.io.ByteArrayOutputStream;
@@ -68,18 +44,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.UUID;
 
 public class PhotosFragment extends Fragment {
 
     public static final int MY_CAMERA_PERMISSION_CODE = 1231;
     public static final int CAMERA_REQUEST = 0x1010;
+    private static final String PHOTO_SPOTLIGHT = "PHOTO_SPOTLIGHT";
     private static final String STRING_AUTHORITY = "com.wright.android.t_minus.ACCESS_DATA";
     private static final String IMAGE_FOLDER = "images/";
     FirebaseStorage storage;
     StorageReference storageReference;
     private PhotoAdapter photoAdapter;
     private String image_path;
+    private View fab;
     private DatabaseReference activeImageDatabaseReference;
 
     public PhotosFragment() {
@@ -96,6 +73,32 @@ public class PhotosFragment extends Fragment {
         checkForSignIn(false);
     }
 
+    public void onTabClick(){
+        if(getActivity() == null || getContext() == null){
+            return;
+        }
+        new SpotlightView.Builder(getActivity())
+                .introAnimationDuration(400)
+                .enableRevealAnimation(true)
+                .performClick(true)
+                .fadeinTextDuration(400)
+                .headingTvColor(getContext().getColor(R.color.colorAccent))
+                .headingTvSize(20)
+                .headingTvText("Take A Photo")
+                .subHeadingTvColor(Color.parseColor("#ffffff"))
+                .subHeadingTvSize(15)
+                .subHeadingTvText("This is used to take a photo of a rocket launch to share with your fellow rocket enthusiasts.")
+                .maskColor(Color.parseColor("#dc000000"))
+                .target(fab)
+                .lineAnimDuration(400)
+                .lineAndArcColor(getContext().getColor(R.color.colorAccent))
+                .dismissOnTouch(true)
+                .dismissOnBackPress(true)
+                .enableDismissAfterShown(true)
+                .usageId(PHOTO_SPOTLIGHT)
+                .show();
+    }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -109,7 +112,7 @@ public class PhotosFragment extends Fragment {
             return false;
         }
         View signInLayout = getView().findViewById(R.id.photos_sign_in_layout);
-        View fab = getView().findViewById(R.id.photo_capture_fab);
+        fab = getView().findViewById(R.id.photo_capture_fab);
         Boolean userSigned = FirebaseAuth.getInstance().getCurrentUser() != null;
         if(!userSigned){
             if(showToast){

@@ -16,6 +16,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -25,8 +26,6 @@ import com.wright.android.t_minus.TextFieldUtils;
 import com.wright.android.t_minus.R;
 
 import java.util.Objects;
-
-import static com.wright.android.t_minus.main_tabs.map.CustomMapFragment.TAG;
 
 public class SignupFragment extends Fragment {
 //TODO: Add error handling for wrong information
@@ -163,7 +162,6 @@ public class SignupFragment extends Fragment {
                     }
                     catch (FirebaseAuthUserCollisionException existEmail)
                     {
-                        Log.d(TAG, "onComplete: exist_email");
                         if(getView() == null){
                             return;
                         }
@@ -172,7 +170,7 @@ public class SignupFragment extends Fragment {
                     }
                     catch (Exception e)
                     {
-                        Log.d(TAG, "onComplete: " + e.getMessage());
+                        Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
         });

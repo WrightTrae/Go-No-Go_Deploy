@@ -1,6 +1,7 @@
 package com.wright.android.t_minus.main_tabs.launchpad;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 
+import com.wooplr.spotlight.SpotlightView;
 import com.wright.android.t_minus.R;
 import com.wright.android.t_minus.ar.ArActivity;
 import com.wright.android.t_minus.objects.PadLocation;
@@ -19,7 +21,9 @@ import java.util.ArrayList;
 
 public class LaunchPadFragment extends Fragment implements ExpandableListView.OnChildClickListener {
 
+    private static final String AR_PAD_SPOTLIGHT = "AR_PAD_SPOTLIGHT";
     private ArrayList<PadLocation> padLocations;
+    private FloatingActionButton fab;
 
     public LaunchPadFragment() {
         // Required empty public constructor
@@ -32,7 +36,7 @@ public class LaunchPadFragment extends Fragment implements ExpandableListView.On
     public void setData(ArrayList<PadLocation> _padLocations){
         padLocations = _padLocations;
         if(getView()!=null){
-            FloatingActionButton fab = getView().findViewById(R.id.fab);
+            fab = getView().findViewById(R.id.fab);
             fab.setOnClickListener((View view)-> {
                 Intent intent = new Intent(getContext(), ArActivity.class);
                 intent.putExtra(ArActivity.ARG_ALL_LAUNCH_PADS, _padLocations);
@@ -47,6 +51,32 @@ public class LaunchPadFragment extends Fragment implements ExpandableListView.On
             for(int i=0; i < padAdapter.getGroupCount(); i++)
                 listView.expandGroup(i);
         }
+    }
+
+    public void onTabClick(){
+        if(getActivity() == null || getContext() == null){
+            return;
+        }
+        new SpotlightView.Builder(getActivity())
+                .introAnimationDuration(400)
+                .enableRevealAnimation(true)
+                .performClick(true)
+                .fadeinTextDuration(400)
+                .headingTvColor(getContext().getColor(R.color.colorAccent))
+                .headingTvSize(20)
+                .headingTvText("Launch Pad Locator")
+                .subHeadingTvColor(Color.parseColor("#ffffff"))
+                .subHeadingTvSize(15)
+                .subHeadingTvText("This is used to explore and discover the locations of all of the launch pads around the world.")
+                .maskColor(Color.parseColor("#dc000000"))
+                .target(fab)
+                .lineAnimDuration(400)
+                .lineAndArcColor(getContext().getColor(R.color.colorAccent))
+                .dismissOnTouch(true)
+                .dismissOnBackPress(true)
+                .enableDismissAfterShown(true)
+                .usageId(AR_PAD_SPOTLIGHT)
+                .show();
     }
 
     @Override
