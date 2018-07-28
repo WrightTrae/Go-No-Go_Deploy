@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
+import com.google.firebase.auth.FirebaseUser;
 import com.wright.android.t_minus.TextFieldUtils;
 import com.wright.android.t_minus.R;
 
