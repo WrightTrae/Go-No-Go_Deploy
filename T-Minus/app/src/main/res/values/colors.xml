@@ -13,4 +13,7 @@
     <color name="transparentGreen">#8000BA4A</color>
     <color name="selectedTabColor">#FFFFFF</color>
     <color name="unselectedTabColor">#AAAAAA</color>
+    <color name="transparentStart">#20000000</color>
+    <color name="transparentMiddle">#10000000</color>
+    <color name="transparentEnd">#05000000</color>
 </resources>

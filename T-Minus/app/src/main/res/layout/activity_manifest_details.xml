@@ -16,105 +16,121 @@
         app:fabSize="normal"
         app:srcCompat="@drawable/ic_visibility_white_24dp" />
 
-    <ScrollView
-        android:id="@+id/scrollView2"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <android.support.constraint.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/manifestDetailsImage"
+            android:layout_width="0dp"
+            android:layout_height="350dp"
+            android:scaleType="center"
+            android:background="#E3E3E3"
+            android:contentDescription="@string/rocket_image"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
-                android:id="@+id/manifestDetailsImage"
-                android:layout_width="0dp"
-                android:layout_height="350dp"
-                android:scaleType="center"
-                android:background="#E3E3E3"
-                android:contentDescription="@string/rocket_image"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/detailsMissionStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto"
+            android:gravity="center"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:textColor="@android:color/background_light"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="@+id/manifestDetailsImage"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/manifestDetailsImage"
+            app:layout_constraintTop_toTopOf="@+id/manifestDetailsImage">
 
             <TextView
-                android:id="@+id/detailsMissionStatus"
-                android:layout_width="match_parent"
+                android:id="@+id/detailsMissionTitle"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp"
+                android:layout_marginStart="20dp"
                 android:fontFamily="@font/roboto"
-                android:gravity="center"
-                android:paddingBottom="10dp"
                 android:paddingTop="10dp"
                 android:textColor="@android:color/background_light"
                 android:textSize="20sp"
-                app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+                app:layout_constraintBottom_toTopOf="@id/detailsNETTime"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
-            <android.support.constraint.ConstraintLayout
+            <TextView
+                android:id="@+id/detailsNETTime"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp"
+                android:layout_marginStart="20dp"
+                android:fontFamily="@font/roboto_light"
+                android:textColor="@android:color/background_light"
+                android:textSize="15sp"
+                app:layout_constraintBottom_toTopOf="@id/detailsLocation"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/manifestDetailsImage"
-                app:layout_constraintTop_toTopOf="@+id/manifestDetailsImage">
+                app:layout_constraintStart_toStartOf="parent" />
 
-                <TextView
-                    android:id="@+id/detailsMissionTitle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginStart="20dp"
-                    android:fontFamily="@font/roboto"
-                    android:paddingTop="10dp"
-                    android:textColor="@android:color/background_light"
-                    android:textSize="20sp"
-                    app:layout_constraintBottom_toTopOf="@id/detailsNETTime"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
+            <TextView
+                android:id="@+id/detailsLocation"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginStart="20dp"
+                android:fontFamily="@font/roboto_light"
+                android:textColor="@android:color/background_light"
+                android:textSize="15sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+        </android.support.constraint.ConstraintLayout>
+    </android.support.constraint.ConstraintLayout>
 
-                <TextView
-                    android:id="@+id/detailsNETTime"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginStart="20dp"
-                    android:fontFamily="@font/roboto_light"
-                    android:textColor="@android:color/background_light"
-                    android:textSize="15sp"
-                    app:layout_constraintBottom_toTopOf="@id/detailsLocation"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
+    <ScrollView
+        android:id="@+id/scrollView2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <LinearLayout
+            android:id="@+id/linearLayout1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/detailsLocation"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginStart="20dp"
-                    android:fontFamily="@font/roboto_light"
-                    android:textColor="@android:color/background_light"
-                    android:textSize="15sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
-            </android.support.constraint.ConstraintLayout>
+            <ImageView
+                android:id="@+id/dropShadow"
+                android:layout_width="wrap_content"
+                android:layout_height="6dp"
+                android:layout_marginTop="340dp"
+                android:src="@drawable/upper_drop_shadow"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
 
             <LinearLayout
                 android:id="@+id/linearLayout"
+                android:background="@android:color/white"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/manifestDetailsImage">
+                android:orientation="vertical">
 
                 <Button
                     android:id="@+id/detailsLiveBtn"
                     style="@style/buttonStyle.primary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="20dp"
                     android:text="@string/live_stream"
                     android:visibility="gone" />
 
@@ -123,7 +139,7 @@
                     style="@style/buttonStyle.secondary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="12dp"
                     android:text="@string/subscribe_for_notification"
                     android:visibility="visible" />
 
@@ -131,7 +147,7 @@
                     style="@style/headerText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="20dp"
                     android:text="@string/mission_details"
                     android:textAlignment="center"
                     android:textColor="@android:color/black" />
@@ -202,9 +218,8 @@
                     android:layout_marginTop="3dp"
                     android:textColor="@android:color/black" />
             </LinearLayout>
-        </android.support.constraint.ConstraintLayout>
+        </LinearLayout>
     </ScrollView>
-
     <ProgressBar
         android:id="@+id/detailsProgressBar"
         style="?android:attr/progressBarStyle"
@@ -216,6 +231,6 @@
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/scrollView2"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 </android.support.constraint.ConstraintLayout>
