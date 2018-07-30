@@ -4,17 +4,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:paddingBottom="0.2dp"
-    android:layout_height="280dp">
+    android:layout_height="wrap_content"
+    android:padding="5dp">
 
 
-    <ImageView
+    <com.wright.android.t_minus.main_tabs.photos.DynamicHeightImageView
         android:id="@+id/grid_image"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:foreground="@drawable/cell_info_background"
-        android:scaleType="centerInside"
-        android:src="@drawable/rocket_default_image"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
@@ -56,7 +56,7 @@
     <TextView
         android:id="@+id/textView2"
         style="@style/headerText"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:text="Test Location Name"
@@ -67,7 +67,7 @@
     <TextView
         android:id="@+id/textView5"
         style="@style/bodyText"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:layout_marginStart="16dp"

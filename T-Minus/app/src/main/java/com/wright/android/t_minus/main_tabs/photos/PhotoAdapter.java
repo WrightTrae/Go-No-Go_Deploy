@@ -3,7 +3,14 @@ package com.wright.android.t_minus.main_tabs.photos;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Point;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.RecyclerView;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,20 +18,26 @@ import android.view.Window;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.crowdfire.cfalertdialog.CFAlertDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 import com.wright.android.t_minus.R;
 import com.wright.android.t_minus.objects.ImageObj;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 
-public class PhotoAdapter extends BaseAdapter{
+public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder>{
     // BASE ID
     private static final long BASE_ID = 0x100000;
 
@@ -39,28 +52,90 @@ public class PhotoAdapter extends BaseAdapter{
         imageObjArrayList = new ArrayList<>();
     }
 
-    // Count
-    public int getCount(){
-        if(imageObjArrayList !=null) {
-            return imageObjArrayList.size();
-        }
-        return 0;
-    }
-
-    // Item
-    public ImageObj getItem(int _position){
-        if(imageObjArrayList !=null) {
-            return imageObjArrayList.get(_position);
-        }
-        return null;
-    }
-
     public void addData(ImageObj imageObj){
         imageObjArrayList.add(imageObj);
     }
 
     public void resetData(){
         imageObjArrayList = new ArrayList<>();
+    }
+
+    @Override
+    public int getItemCount() {
+        if(imageObjArrayList !=null) {
+            return imageObjArrayList.size();
+        }
+        return 0;
+    }
+
+    @NonNull
+    @Override
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        ViewHolder vh;
+            View _recycleView = LayoutInflater.from(mContext).inflate(R.layout.photo_grid_cell, parent, false);
+            vh = new ViewHolder(_recycleView);
+            _recycleView.setTag(vh);
+            vh.likesView.setOnClickListener((View v)->likeImage(vh));
+            _recycleView.setOnClickListener(new DoubleClickListener(500) {
+                @Override
+                public void onDoubleClick(View view) {
+                    likeImage(vh);
+                }
+                @Override
+                public void onSingleClick(View view) {
+                    if(mContext == null){
+                        return;
+                    }
+                    Dialog settingsDialog = new Dialog(mContext);
+                    int selectedIndex = (int) view.findViewById(R.id.grid_image).getTag();
+                    if(settingsDialog.getWindow()!=null) {
+                        settingsDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+                    }
+                    View popup = LayoutInflater.from(mContext).inflate(R.layout.image_popup_layout, null);
+                    Picasso.get().load(getItem(selectedIndex).getDownloadUrl()).
+                            placeholder(R.drawable.rocket_default_image).purgeable()
+                            .noFade().into((ImageView)popup.findViewById(R.id.popup_image));
+                    popup.findViewById(R.id.popup_image).setOnClickListener((View v) -> settingsDialog.dismiss());
+                    popup.findViewById(R.id.popup_report_btn).setOnClickListener((View v) -> {
+                        showReportDialog(parent, vh);
+                        settingsDialog.dismiss();
+                    });
+                    settingsDialog.setContentView(popup);
+                    settingsDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                    settingsDialog.setCancelable(true);
+                    settingsDialog.show();
+                }
+            });
+            return vh;
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder vh, int _position) {
+        ImageObj imageObj = getItem(_position);
+        if(imageObj != null) {
+            if(imageObj.isLiked()) {
+                vh.ivLikesIcon.setColorFilter(mContext.getColor(R.color.colorAccent));
+                vh.likesView.setTag(false);
+            }else {
+                vh.ivLikesIcon.setColorFilter(mContext.getColor(android.R.color.white));
+                vh.likesView.setTag(true);
+            }
+            vh.tvLikes.setText(String.valueOf(imageObj.getLikes()));
+            Picasso picasso = Picasso.get();
+            picasso.load(getItem(_position).getDownloadUrl()).into(vh);
+            vh.ivImage.setTag(_position);
+//            Glide.with(mContext).asBitmap().load(getItem(_position).getDownloadUrl())
+//                    .apply(new RequestOptions().skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE))
+//                    .into(vh.ivImage);
+        }
+    }
+
+    // Item
+    private ImageObj getItem(int _position){
+        if(imageObjArrayList !=null) {
+            return imageObjArrayList.get(_position);
+        }
+        return null;
     }
 
     // Item ID
@@ -140,77 +215,50 @@ public class PhotoAdapter extends BaseAdapter{
         notifyDataSetChanged();
     }
 
-    // Get the inflated child / line-item view
-    public View getView(int _position, View _recycleView, ViewGroup _parentView){
-        ViewHolder vh;
-        if(_recycleView == null) {
-            _recycleView = LayoutInflater.from(mContext).inflate(R.layout.photo_grid_cell, _parentView, false);
-            vh = new ViewHolder(_recycleView);
-            _recycleView.setTag(vh);
-            vh.likesView.setOnClickListener((View v)->likeImage(vh));
-            _recycleView.setOnClickListener(new DoubleClickListener(500) {
-                @Override
-                public void onDoubleClick(View view) {
-                    likeImage(vh);
-                }
-                @Override
-                public void onSingleClick(View view) {
-                    if(mContext == null){
-                        return;
-                    }
-                    Dialog settingsDialog = new Dialog(mContext);
-                    int selectedIndex = (int) view.findViewById(R.id.grid_image).getTag();
-                    if(settingsDialog.getWindow()!=null) {
-                        settingsDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-                    }
-                    View popup = LayoutInflater.from(mContext).inflate(R.layout.image_popup_layout, null);
-                    Picasso.get().load(getItem(selectedIndex).getDownloadUrl()).
-                            placeholder(R.drawable.rocket_default_image).purgeable()
-                            .noFade().into((ImageView)popup.findViewById(R.id.popup_image));
-                    popup.findViewById(R.id.popup_image).setOnClickListener((View v) -> settingsDialog.dismiss());
-                    popup.findViewById(R.id.popup_report_btn).setOnClickListener((View v) -> {
-                        showReportDialog(_parentView, vh);
-                        settingsDialog.dismiss();
-                    });
-                    settingsDialog.setContentView(popup);
-                    settingsDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-                    settingsDialog.setCancelable(true);
-                    settingsDialog.show();
-                }
-            });
-        }else{
-            vh = (ViewHolder) _recycleView.getTag();
-        }
-        ImageObj imageObj = getItem(_position);
-        if(imageObj != null) {
-            if(imageObj.isLiked()) {
-                vh.ivLikesIcon.setColorFilter(mContext.getColor(R.color.colorAccent));
-                vh.likesView.setTag(false);
-            }else {
-                vh.ivLikesIcon.setColorFilter(mContext.getColor(android.R.color.white));
-                vh.likesView.setTag(true);
-            }
-            vh.tvLikes.setText(String.valueOf(imageObj.getLikes()));
-            Picasso picasso = Picasso.get();
-            picasso.load(imageObj.getDownloadUrl())
-                    .fit().centerCrop().noFade().placeholder(R.drawable.rocket_default_image).into(vh.ivImage);
-            vh.ivImage.setTag(_position);
-        }
-        return _recycleView;
-    }
-
     // Optimize with view holder!
-    static class ViewHolder{
-        final ImageView ivImage;
+    static class ViewHolder extends RecyclerView.ViewHolder implements Target{
+        final DynamicHeightImageView ivImage;
         final TextView tvLikes;
         final ImageView ivLikesIcon;
         final View likesView;
+
         private ViewHolder(View _layout){
+            super(_layout);
             ivImage = _layout.findViewById(R.id.grid_image);
             ivImage.setScaleType(ImageView.ScaleType.CENTER);
             tvLikes = _layout.findViewById(R.id.grid_cell_likes);
             ivLikesIcon = _layout.findViewById(R.id.photo_cell_like_image);
             likesView = _layout.findViewById(R.id.photo_cell_like_layout);
+            _layout.getWidth();
+        }
+
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+            // Calculate the image ratio of the loaded bitmap
+            float ratio = (float) bitmap.getHeight() / (float) bitmap.getWidth();
+            // Set the ratio for the image
+            ivImage.setHeightRatio(ratio);
+            // Load the image into the view
+//            BitmapFactory.Options options = new BitmapFactory.Options();
+////            options.inJustDecodeBounds = true;
+////            options.inMutable = true;
+//            options.inJustDecodeBounds = false;
+//            options.inSampleSize = 1;
+//            options.inBitmap = bitmap;
+            int w = ivImage.getWidth();
+            bitmap = Bitmap.createScaledBitmap(bitmap, ivImage.getWidth(),
+                    (int) (w * ratio), false);
+            ivImage.setImageBitmap(bitmap);
+        }
+
+        @Override
+        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+
         }
     }
 }

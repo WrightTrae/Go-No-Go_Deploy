@@ -23,7 +23,7 @@
         <ImageView
             android:id="@+id/manifestDetailsImage"
             android:layout_width="0dp"
-            android:layout_height="350dp"
+            android:layout_height="425dp"
             android:scaleType="center"
             android:background="#E3E3E3"
             android:contentDescription="@string/rocket_image"
@@ -113,7 +113,7 @@
                 android:id="@+id/dropShadow"
                 android:layout_width="wrap_content"
                 android:layout_height="6dp"
-                android:layout_marginTop="340dp"
+                android:layout_marginTop="420dp"
                 android:src="@drawable/upper_drop_shadow"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"/>

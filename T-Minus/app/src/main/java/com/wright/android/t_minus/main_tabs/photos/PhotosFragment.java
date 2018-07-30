@@ -17,6 +17,8 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +36,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.wooplr.spotlight.SpotlightView;
+import com.wright.android.t_minus.DialogUtils;
 import com.wright.android.t_minus.R;
 import com.wright.android.t_minus.objects.ImageObj;
 import com.wright.android.t_minus.settings.PreferencesActivity;
@@ -108,6 +111,7 @@ public class PhotosFragment extends Fragment {
     }
 
     private boolean checkForSignIn(Boolean showToast){
+        assert getContext() != null;
         if(getView() == null){
             return false;
         }
@@ -142,9 +146,10 @@ public class PhotosFragment extends Fragment {
             FloatingActionButton fab = view.findViewById(R.id.photo_capture_fab);
             fab.setOnClickListener((View v) -> showDataFromFAB());
 
-            GridView gridView = view.findViewById(R.id.photoGrid);
+            RecyclerView recyclerView = view.findViewById(R.id.photoGrid);
+            recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
             photoAdapter = new PhotoAdapter(getContext());
-            gridView.setAdapter(photoAdapter);
+            recyclerView.setAdapter(photoAdapter);
         }
     }
 
@@ -230,16 +235,15 @@ public class PhotosFragment extends Fragment {
     }
 
     private Uri getOutputUri() {
-        if(getContext() == null){
-            return null;
-        }
+        assert getContext() != null;
         File f = getImageFile();
         return (f==null?null: FileProvider.getUriForFile(getContext(),STRING_AUTHORITY,f));
     }
 
     private File getImageFile(){
+        assert getContext() != null;
         File imageFile = new File(image_path);
-        boolean created = false;
+        boolean created;
         try {
             created = imageFile.createNewFile();
         }catch (IOException e){
