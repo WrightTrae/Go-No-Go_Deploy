@@ -82,8 +82,8 @@ public class ArActivity extends AppCompatActivity {
 
     private void setupAr(){
         SharedPreferences onBoardPrefs = getPreferences(MODE_PRIVATE);
-        boolean shown = onBoardPrefs.getBoolean("shown", false);
-        if(!shown) {
+//        boolean shown = onBoardPrefs.getBoolean("shown", false);
+//        if(!shown) {
             Dialog onboardDialog = new Dialog(this);
             if (onboardDialog.getWindow() != null) {
                 onboardDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
@@ -106,11 +106,11 @@ public class ArActivity extends AppCompatActivity {
                     handler.removeCallbacks(runnable));
             handler.postDelayed(runnable, 10000);
 
-            SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putBoolean("shown", true);
-            editor.apply();
-        }
+////            SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+////            SharedPreferences.Editor editor = sharedPref.edit();
+////            editor.putBoolean("shown", true);
+////            editor.apply();
+//        }
 
         CompletableFuture<ModelRenderable> andy = ModelRenderable.builder()
                 .setSource(this, R.raw.model)

@@ -49,13 +49,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:icon="@drawable/ic_photo_24dp"
-                android:text="Photos" />
-
-            <android.support.design.widget.TabItem
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:icon="@drawable/ic_person_white_24dp"
-                android:text="Profile" />
+                android:text="@string/photos" />
 
         </android.support.design.widget.TabLayout>
     </android.support.design.widget.AppBarLayout>

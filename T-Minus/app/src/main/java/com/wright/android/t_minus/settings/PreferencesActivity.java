@@ -16,7 +16,7 @@ public class PreferencesActivity extends AppCompatActivity {
         if(getSupportActionBar()!=null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
-            getSupportActionBar().setTitle("");
+            getSupportActionBar().setTitle("Settings");
         }
         p =  PreferencesFragment.newInstance();
         p.setActivity(this);

@@ -28,7 +28,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.wright.android.t_minus.main_tabs.Profile.ProfileMainFragment;
 import com.wright.android.t_minus.main_tabs.launchpad.LaunchPadFragment;
 import com.wright.android.t_minus.main_tabs.manifest.ManifestFragment;
 import com.wright.android.t_minus.main_tabs.photos.PhotosFragment;
@@ -42,13 +41,11 @@ import com.wright.android.t_minus.network_connection.NetworkUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MainTabbedActivity extends AppCompatActivity implements GetManifestsFromAPI.OnFinished, TabLayout.OnTabSelectedListener{
+public class MainTabbedActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener{
     private LaunchPadFragment launchPadFragment;
     private ManifestFragment manifestFragment;
     private PhotosFragment photosFragment;
-    private ProfileMainFragment profileMainFragment;
     private ViewPager mMainViewPager;
-    private DatabaseReference mDatabaseRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,9 +56,9 @@ public class MainTabbedActivity extends AppCompatActivity implements GetManifest
         setSupportActionBar(toolbar);
         mMainViewPager = findViewById(R.id.container);
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        mMainViewPager.setOffscreenPageLimit(3);
         mMainViewPager.setAdapter(sectionsPagerAdapter);
         TabLayout tabLayout = findViewById(R.id.tabs);
+        mMainViewPager.setOffscreenPageLimit(2);
         TabLayout.Tab originalTab = tabLayout.getTabAt(0);
         if(originalTab != null && originalTab.getIcon() != null){
             originalTab.getIcon().setColorFilter(getColor(R.color.selectedTabColor), PorterDuff.Mode.SRC_IN);
@@ -76,129 +73,8 @@ public class MainTabbedActivity extends AppCompatActivity implements GetManifest
         tabLayout.addOnTabSelectedListener(this);
         manifestFragment = ManifestFragment.newInstance();
         launchPadFragment = LaunchPadFragment.newInstance();
-        profileMainFragment = ProfileMainFragment.newInstance();
         photosFragment = PhotosFragment.newInstance();
-        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        downloadManifests();
-    }
 
-    private void downloadManifests(){
-        if(NetworkUtils.isConnected(this)){
-            new GetManifestsFromAPI(this).execute();
-        }else{
-            Snackbar.make(mMainViewPager, "No internet connection", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("Reload", (View v) -> downloadManifests()).show();
-        }
-    }
-
-    @Override
-    public void onFinished(Manifest[] _manifests) {//downloadManifests Finish
-        ArrayList<PadLocation> padLocations = new ArrayList<>();
-        for(Manifest manifest:_manifests){
-            if(manifest.getPadLocation() == null){
-                continue;
-            }
-            if (containsName(padLocations, manifest.getPadLocation().getId())) {
-                padLocations.add(manifest.getPadLocation());
-            }
-        }
-        checkIfPadLocationExist(padLocations);
-        manifestFragment.setData(_manifests);
-    }
-
-    private boolean containsName(final ArrayList<PadLocation> list, final int name){
-        return list.stream().noneMatch((o -> o.getId() == (name)));
-    }
-
-    private void checkIfPadLocationExist(ArrayList<PadLocation> _padLocations){
-        mDatabaseRef.child("launch_locations").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (PadLocation pad: _padLocations) {
-                    if(pad.getLaunchPads()==null || pad.getName().toLowerCase().equals("air launch to orbit")){
-                        continue;
-                    }
-                    if (!dataSnapshot.hasChild(String.valueOf(pad.getId()))) {
-                        updateFireballPadLocations(pad);
-                    }else{
-                        pad.setName((String) dataSnapshot.child(String.valueOf(pad.getId())).child("name").getValue());
-                    }
-                }
-
-                for(DataSnapshot locationSnap: dataSnapshot.getChildren()){
-                    int locationId = Integer.parseInt(locationSnap.getKey());
-                    if (containsName(_padLocations, locationId)){
-                        String name = (String) locationSnap.child("name").getValue();
-                        PadLocation padLocation = new PadLocation(locationId, name, new ArrayList<>());
-                        _padLocations.add(padLocation);
-                    }
-                }
-                checkIfPadExist(_padLocations);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void updateFireballPadLocations(PadLocation _padLocation){
-        HashMap<String, Object> locationMap = new HashMap<>();
-        locationMap.put("name", _padLocation.getName());
-        DatabaseReference locationRef = mDatabaseRef.child("launch_locations").child(String.valueOf(_padLocation.getId()));
-        locationRef.setValue(locationMap);
-    }
-
-    private void checkIfPadExist(ArrayList<PadLocation> _padLocations){
-        mDatabaseRef.child("launch_pads").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (PadLocation pad: _padLocations) {
-                    if(pad.getLaunchPads()==null || pad.getName().toLowerCase().equals("air launch to orbit")){
-                        continue;
-                    }
-                    for(LaunchPad launchPad : pad.getLaunchPads()) {
-                        if (!dataSnapshot.hasChild(String.valueOf(launchPad.getId()))) {
-                            updateFirebasePad(launchPad);
-                        }else{
-                            launchPad.setName((String) dataSnapshot.child(String.valueOf(launchPad.getId())).child("name").getValue());
-                        }
-                    }
-                }
-                for(DataSnapshot padSnap: dataSnapshot.getChildren()){
-                    int padId = Integer.parseInt(padSnap.getKey());
-                    if (containsName(_padLocations, padId)){
-                        String name = (String) padSnap.child("name").getValue();
-                        double latitude = (double) padSnap.child("latitude").getValue();
-                        long locationId = (long) padSnap.child("locationId").getValue();
-                        double longitude = (double) padSnap.child("longitude").getValue();
-                        LaunchPad launchPad = new LaunchPad(padId,name,latitude,longitude,(int)locationId);
-                        for(PadLocation padLocation: _padLocations){
-                            if (padLocation.getId() == launchPad.getLocationId()){
-                                padLocation.addLaunchPads(launchPad);
-                            }
-                        }
-                    }
-                }
-                launchPadFragment.setData(_padLocations);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void updateFirebasePad(LaunchPad launchPad){
-        HashMap<String, Object> padMap = new HashMap<>();
-        padMap.put("latitude", launchPad.getLatitude());
-        padMap.put("longitude", launchPad.getLongitude());
-        padMap.put("locationId", launchPad.getLocationId());
-        padMap.put("name", launchPad.getName());
-        DatabaseReference padRef = mDatabaseRef.child("launch_pads").child(String.valueOf(launchPad.getId()));
-        padRef.setValue(padMap);
     }
 
     @Override
@@ -262,8 +138,6 @@ public class MainTabbedActivity extends AppCompatActivity implements GetManifest
                     return launchPadFragment;
                 case 2:
                     return photosFragment;
-                case 3:
-                    return profileMainFragment;
                 default:
                     return null;
             }
@@ -271,7 +145,7 @@ public class MainTabbedActivity extends AppCompatActivity implements GetManifest
 
         @Override
         public int getCount() {
-            return 4;
+            return 3;
         }
     }
 }

@@ -13,7 +13,7 @@ public class GetAgencyUrlAPI extends AsyncTask<String, Void, Manifest[]> {
 
 
     public interface OnFinished {
-        void onFinished(Manifest[] _url);
+        void onAgencyFinished(Manifest[] _url);
     }
 
     public GetAgencyUrlAPI(OnFinished _finished, Manifest[] manifests) {
@@ -49,7 +49,7 @@ public class GetAgencyUrlAPI extends AsyncTask<String, Void, Manifest[]> {
         super.onPostExecute(_result);
         // Update the UI
         if (_result != null) {
-            mFinishedInterface.onFinished(_result);
+            mFinishedInterface.onAgencyFinished(_result);
         }
     }
 }

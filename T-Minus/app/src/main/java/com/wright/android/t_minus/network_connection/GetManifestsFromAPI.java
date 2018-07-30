@@ -25,7 +25,7 @@ public class GetManifestsFromAPI extends AsyncTask<String, Void, Manifest[]> {
 
 
     public interface OnFinished {
-        void onFinished(Manifest[] _redditList);
+        void onManifestFinished(Manifest[] _manifests);
     }
 
     public GetManifestsFromAPI(OnFinished _finished) {
@@ -113,7 +113,7 @@ public class GetManifestsFromAPI extends AsyncTask<String, Void, Manifest[]> {
         super.onPostExecute(_result);
         // Update the UI
         if (_result != null) {
-            mFinishedInterface.onFinished(_result);
+            mFinishedInterface.onManifestFinished(_result);
         }
     }
 }

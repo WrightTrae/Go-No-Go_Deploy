@@ -166,7 +166,7 @@ public class PhotoAdapter extends BaseAdapter{
                     View popup = LayoutInflater.from(mContext).inflate(R.layout.image_popup_layout, null);
                     Picasso.get().load(getItem(selectedIndex).getDownloadUrl()).
                             placeholder(R.drawable.rocket_default_image).purgeable()
-                            .into((ImageView)popup.findViewById(R.id.popup_image));
+                            .noFade().into((ImageView)popup.findViewById(R.id.popup_image));
                     popup.findViewById(R.id.popup_image).setOnClickListener((View v) -> settingsDialog.dismiss());
                     popup.findViewById(R.id.popup_report_btn).setOnClickListener((View v) -> {
                         showReportDialog(_parentView, vh);
@@ -193,7 +193,7 @@ public class PhotoAdapter extends BaseAdapter{
             vh.tvLikes.setText(String.valueOf(imageObj.getLikes()));
             Picasso picasso = Picasso.get();
             picasso.load(imageObj.getDownloadUrl())
-                    .fit().centerCrop().placeholder(R.drawable.rocket_default_image).into(vh.ivImage);
+                    .fit().centerCrop().noFade().placeholder(R.drawable.rocket_default_image).into(vh.ivImage);
             vh.ivImage.setTag(_position);
         }
         return _recycleView;

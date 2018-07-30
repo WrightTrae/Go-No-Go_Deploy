@@ -2,27 +2,32 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:padding="5dp"
-    android:layout_height="225dp">
+    android:paddingBottom="0.2dp"
+    android:layout_height="280dp">
 
 
     <ImageView
         android:id="@+id/grid_image"
-        android:src="@drawable/rocket_default_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:foreground="@drawable/cell_info_background"
         android:scaleType="centerInside"
+        android:src="@drawable/rocket_default_image"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
     <LinearLayout
         android:id="@+id/photo_cell_like_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:visibility="gone"
         android:padding="5dp"
         android:background="@color/transparentBack"
         app:layout_constraintEnd_toEndOf="@+id/grid_image"
@@ -47,4 +52,28 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"/>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/textView2"
+        style="@style/headerText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="Test Location Name"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@+id/textView5"
+        app:layout_constraintStart_toStartOf="@id/grid_image"/>
+
+    <TextView
+        android:id="@+id/textView5"
+        style="@style/bodyText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
+        android:text="Launch Test Name"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="@id/grid_image"
+        app:layout_constraintStart_toStartOf="@id/grid_image" />
+
 </android.support.constraint.ConstraintLayout>
