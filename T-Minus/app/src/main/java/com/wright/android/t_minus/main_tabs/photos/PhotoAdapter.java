@@ -19,10 +19,6 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
 import com.crowdfire.cfalertdialog.CFAlertDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -40,11 +36,9 @@ import java.util.HashMap;
 public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder>{
     // BASE ID
     private static final long BASE_ID = 0x100000;
-
-    // Reference to our owning screen (context)
     private final Context mContext;
-
     private ArrayList<ImageObj> imageObjArrayList;
+    private Boolean clickable = true;
 
     // C-tor
     public PhotoAdapter(Context _context){
@@ -52,12 +46,18 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder>{
         imageObjArrayList = new ArrayList<>();
     }
 
-    public void addData(ImageObj imageObj){
-        imageObjArrayList.add(imageObj);
+    public void addData(ArrayList<ImageObj> imageObjs){
+        imageObjArrayList.addAll(imageObjs);
+        notifyDataSetChanged();
     }
 
     public void resetData(){
-        imageObjArrayList = new ArrayList<>();
+        imageObjArrayList.clear();
+        notifyDataSetChanged();
+    }
+
+    public void setClickable(Boolean enabled){
+        clickable = enabled;
     }
 
     @Override
@@ -79,11 +79,14 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder>{
             _recycleView.setOnClickListener(new DoubleClickListener(500) {
                 @Override
                 public void onDoubleClick(View view) {
+                    if(mContext == null||!clickable){
+                        return;
+                    }
                     likeImage(vh);
                 }
                 @Override
                 public void onSingleClick(View view) {
-                    if(mContext == null){
+                    if(mContext == null||!clickable){
                         return;
                     }
                     Dialog settingsDialog = new Dialog(mContext);
@@ -113,6 +116,7 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder>{
     public void onBindViewHolder(@NonNull ViewHolder vh, int _position) {
         ImageObj imageObj = getItem(_position);
         if(imageObj != null) {
+            vh.locationName.setText(imageObj.getLocationName());
             if(imageObj.isLiked()) {
                 vh.ivLikesIcon.setColorFilter(mContext.getColor(R.color.colorAccent));
                 vh.likesView.setTag(false);
@@ -122,11 +126,8 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder>{
             }
             vh.tvLikes.setText(String.valueOf(imageObj.getLikes()));
             Picasso picasso = Picasso.get();
-            picasso.load(getItem(_position).getDownloadUrl()).into(vh);
+            picasso.load(getItem(_position).getDownloadUrl()).resize(650, 0).into(vh);
             vh.ivImage.setTag(_position);
-//            Glide.with(mContext).asBitmap().load(getItem(_position).getDownloadUrl())
-//                    .apply(new RequestOptions().skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE))
-//                    .into(vh.ivImage);
         }
     }
 
@@ -221,6 +222,7 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder>{
         final TextView tvLikes;
         final ImageView ivLikesIcon;
         final View likesView;
+        final TextView locationName;
 
         private ViewHolder(View _layout){
             super(_layout);
@@ -229,25 +231,14 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder>{
             tvLikes = _layout.findViewById(R.id.grid_cell_likes);
             ivLikesIcon = _layout.findViewById(R.id.photo_cell_like_image);
             likesView = _layout.findViewById(R.id.photo_cell_like_layout);
+            locationName = _layout.findViewById(R.id.grid_cell_location);
             _layout.getWidth();
         }
 
         @Override
         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-            // Calculate the image ratio of the loaded bitmap
             float ratio = (float) bitmap.getHeight() / (float) bitmap.getWidth();
-            // Set the ratio for the image
             ivImage.setHeightRatio(ratio);
-            // Load the image into the view
-//            BitmapFactory.Options options = new BitmapFactory.Options();
-////            options.inJustDecodeBounds = true;
-////            options.inMutable = true;
-//            options.inJustDecodeBounds = false;
-//            options.inSampleSize = 1;
-//            options.inBitmap = bitmap;
-            int w = ivImage.getWidth();
-            bitmap = Bitmap.createScaledBitmap(bitmap, ivImage.getWidth(),
-                    (int) (w * ratio), false);
             ivImage.setImageBitmap(bitmap);
         }
 

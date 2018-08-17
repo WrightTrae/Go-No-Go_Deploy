@@ -7,22 +7,24 @@ import com.wright.android.t_minus.objects.Manifest;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-public class GetAgencyUrlAPI extends AsyncTask<String, Void, Manifest[]> {
+import java.util.ArrayList;
+
+public class GetAgencyUrlAPI extends AsyncTask<String, Void, ArrayList<Manifest>> {
     final private OnFinished mFinishedInterface;
-    private final Manifest[] manifestArrayList;
+    private final ArrayList<Manifest> manifestArrayList;
 
 
     public interface OnFinished {
-        void onAgencyFinished(Manifest[] _url);
+        void onAgencyFinished(ArrayList<Manifest> _url);
     }
 
-    public GetAgencyUrlAPI(OnFinished _finished, Manifest[] manifests) {
+    public GetAgencyUrlAPI(OnFinished _finished, ArrayList<Manifest> manifests) {
         mFinishedInterface = _finished;
         manifestArrayList = manifests;
     }
 
     @Override
-    protected Manifest[] doInBackground(String... _params) {
+    protected ArrayList<Manifest> doInBackground(String... _params) {
         for (Manifest manifest:manifestArrayList) {
             if(manifest.getImageUrl() == null) {
                 manifest.setAgencyURL(parseJSON(NetworkUtils.getNetworkData("https://autocomplete.clearbit.com/v1/companies/suggest?query="
@@ -45,7 +47,7 @@ public class GetAgencyUrlAPI extends AsyncTask<String, Void, Manifest[]> {
     }
 
     @Override
-    protected void onPostExecute(Manifest[] _result) {
+    protected void onPostExecute(ArrayList<Manifest> _result) {
         super.onPostExecute(_result);
         // Update the UI
         if (_result != null) {

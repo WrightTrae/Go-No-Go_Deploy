@@ -1,79 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<android.support.v7.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="5dp">
+    app:cardCornerRadius="5dp"
+    app:cardMaxElevation="3dp"
+    android:layout_margin="5dp">
 
-
-    <com.wright.android.t_minus.main_tabs.photos.DynamicHeightImageView
-        android:id="@+id/grid_image"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:foreground="@drawable/cell_info_background"
-        android:scaleType="fitCenter"
-        android:adjustViewBounds="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/photo_cell_like_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:visibility="gone"
-        android:padding="5dp"
-        android:background="@color/transparentBack"
-        app:layout_constraintEnd_toEndOf="@+id/grid_image"
-        app:layout_constraintTop_toTopOf="@+id/grid_image">
 
-        <ImageView
-            android:id="@+id/photo_cell_like_image"
-            android:layout_width="15dp"
-            android:layout_height="15dp"
-            android:layout_marginEnd="2dp"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            app:srcCompat="@drawable/ic_thumb_up_24dp" />
+        <com.wright.android.t_minus.main_tabs.photos.DynamicHeightImageView
+            android:id="@+id/grid_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:foreground="@drawable/cell_info_background"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
 
-        <TextView
-            android:id="@+id/grid_cell_likes"
-            style="@style/bodyText"
-            android:textColor="@android:color/white"
-            android:layout_margin="0dp"
-            android:layout_gravity="center"
+        <LinearLayout
+            android:id="@+id/photo_cell_like_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
-    </LinearLayout>
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:padding="5dp"
+            android:background="@color/transparentBack"
+            app:layout_constraintEnd_toEndOf="@+id/grid_image"
+            app:layout_constraintTop_toTopOf="@+id/grid_image">
 
-    <TextView
-        android:id="@+id/textView2"
-        style="@style/headerText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:text="Test Location Name"
-        android:textColor="@android:color/white"
-        app:layout_constraintBottom_toTopOf="@+id/textView5"
-        app:layout_constraintStart_toStartOf="@id/grid_image"/>
+            <ImageView
+                android:id="@+id/photo_cell_like_image"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_marginEnd="2dp"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                app:srcCompat="@drawable/ic_thumb_up_24dp" />
 
-    <TextView
-        android:id="@+id/textView5"
-        style="@style/bodyText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginStart="16dp"
-        android:text="Launch Test Name"
-        android:textColor="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="@id/grid_image"
-        app:layout_constraintStart_toStartOf="@id/grid_image" />
+            <TextView
+                android:id="@+id/grid_cell_likes"
+                style="@style/bodyText"
+                android:textColor="@android:color/white"
+                android:layout_margin="0dp"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+        </LinearLayout>
 
-</android.support.constraint.ConstraintLayout>
+        <TextView
+            android:id="@+id/grid_cell_location"
+            style="@style/headerText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:textColor="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/grid_image"
+            app:layout_constraintStart_toStartOf="@id/grid_image"/>
+
+        <!--<TextView-->
+            <!--android:id="@+id/textView5"-->
+            <!--style="@style/bodyText"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginBottom="16dp"-->
+            <!--android:layout_marginStart="16dp"-->
+            <!--android:text="Launch Test Name"-->
+            <!--android:textColor="@android:color/white"-->
+            <!--app:layout_constraintBottom_toBottomOf="@id/grid_image"-->
+            <!--app:layout_constraintStart_toStartOf="@id/grid_image" />-->
+    </android.support.constraint.ConstraintLayout>
+</android.support.v7.widget.CardView>

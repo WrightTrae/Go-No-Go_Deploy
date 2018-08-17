@@ -16,12 +16,17 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -51,10 +56,48 @@ public class MainTabbedActivity extends AppCompatActivity implements TabLayout.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_tabbed);
+        mMainViewPager = findViewById(R.id.container);
+
+        //MobileAds.initialize(this, "ca-app-pub-9162158259171878~9059604120");
+
+//        AdView mAdView = findViewById(R.id.adView);
+//
+//        AdRequest adRequest = new AdRequest.Builder().build();
+//        mAdView.setAdListener(new AdListener() {
+//            @Override
+//            public void onAdLoaded() {
+//                // Code to be executed when an ad finishes loading.
+//                mMainViewPager.setPadding(0,0,0, mAdView.getHeight());
+//            }
+//
+//            @Override
+//            public void onAdFailedToLoad(int errorCode) {
+//                // Code to be executed when an ad request fails.
+//                mMainViewPager.setPadding(0,0,0, 0);
+//            }
+//
+//            @Override
+//            public void onAdOpened() {
+//                // Code to be executed when an ad opens an overlay that
+//                // covers the screen.
+//            }
+//
+//            @Override
+//            public void onAdLeftApplication() {
+//                // Code to be executed when the user has left the app.
+//            }
+//
+//            @Override
+//            public void onAdClosed() {
+//                // Code to be executed when when the user is about to return
+//                // to the app after tapping on an ad.
+//            }
+//        });
+//        mAdView.loadAd(adRequest);
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
-        mMainViewPager = findViewById(R.id.container);
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mMainViewPager.setAdapter(sectionsPagerAdapter);
         TabLayout tabLayout = findViewById(R.id.tabs);
@@ -76,6 +119,11 @@ public class MainTabbedActivity extends AppCompatActivity implements TabLayout.O
         photosFragment = PhotosFragment.newInstance();
 
     }
+
+//    public int dpToPx(int dp) {
+//        DisplayMetrics displayMetrics = this.getResources().getDisplayMetrics();
+//        return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {/////////////////Setup UI\\\\\\\\\\\\\\\\\\\\

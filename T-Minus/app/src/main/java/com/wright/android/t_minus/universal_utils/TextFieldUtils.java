@@ -1,4 +1,4 @@
-package com.wright.android.t_minus;
+package com.wright.android.t_minus.universal_utils;
 
 public class TextFieldUtils {
     public static boolean isEmailValid(String email) {

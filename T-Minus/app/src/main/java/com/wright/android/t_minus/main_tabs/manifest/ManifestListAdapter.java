@@ -12,22 +12,19 @@ import com.squareup.picasso.Picasso;
 import com.wright.android.t_minus.objects.Manifest;
 import com.wright.android.t_minus.R;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
 
 public class ManifestListAdapter extends BaseAdapter{
-    // BASE ID
+
     private static final long BASE_ID = 0x100000;
-
-    // Reference to our owning screen (context)
     private final Context mContext;
-
-    // Reference to our collection
-    private final Manifest[] manifests;
+    private ArrayList<Manifest> manifests;
 
     // C-tor
-    public ManifestListAdapter(Context _context, Manifest[] manifests){
+    public ManifestListAdapter(Context _context, ArrayList<Manifest> manifests){
         mContext = _context;
         this.manifests = manifests;
     }
@@ -35,7 +32,7 @@ public class ManifestListAdapter extends BaseAdapter{
     // Count
     public int getCount(){
         if(manifests !=null) {
-            return manifests.length;
+            return manifests.size();
         }
         return 0;
     }
@@ -43,9 +40,19 @@ public class ManifestListAdapter extends BaseAdapter{
     // Item
     public Object getItem(int _position){
         if(manifests !=null) {
-            return manifests[_position];
+            return manifests.get(_position);
         }
         return null;
+    }
+
+    public void updateData(ArrayList<Manifest> manifests){
+        this.manifests.addAll(manifests);
+        notifyDataSetChanged();
+    }
+
+    public void resetData(){
+        this.manifests = new ArrayList<>();
+        notifyDataSetChanged();
     }
 
     // Item ID

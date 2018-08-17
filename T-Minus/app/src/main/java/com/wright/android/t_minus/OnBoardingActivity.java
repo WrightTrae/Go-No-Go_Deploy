@@ -1,6 +1,7 @@
 package com.wright.android.t_minus;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorCompat;
@@ -19,6 +20,7 @@ public class OnBoardingActivity extends AppCompatActivity {
     public static final int STARTUP_DELAY = 300;
     public static final int ANIM_ITEM_DURATION = 1000;
     public static final int ITEM_DELAY = 300;
+    public static final String loginScreen = "loginScreen";
 
     private boolean animationStarted = false;
 
@@ -33,7 +35,8 @@ public class OnBoardingActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if(FirebaseAuth.getInstance().getCurrentUser() != null){
+        SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
+        if(FirebaseAuth.getInstance().getCurrentUser() != null||sharedPreferences.contains(loginScreen)){
             finish();
             Intent intent = new Intent(getApplicationContext(), MainTabbedActivity.class);
             startActivity(intent);
@@ -56,10 +59,12 @@ public class OnBoardingActivity extends AppCompatActivity {
         ImageView logoImageView = (ImageView) findViewById(R.id.img_logo);
         ViewGroup container = (ViewGroup) findViewById(R.id.container);
         findViewById(R.id.on_board_sign_in).setOnClickListener((View v)-> {
+            getPreferences(MODE_PRIVATE).edit().putBoolean(loginScreen, true).apply();
             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(intent);
         });
         findViewById(R.id.on_board_skip).setOnClickListener((View v)-> {
+            getPreferences(MODE_PRIVATE).edit().putBoolean(loginScreen, true).apply();
             Intent intent = new Intent(getApplicationContext(), MainTabbedActivity.class);
             startActivity(intent);
         });

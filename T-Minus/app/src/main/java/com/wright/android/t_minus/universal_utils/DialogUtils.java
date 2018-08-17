@@ -1,4 +1,4 @@
-package com.wright.android.t_minus;
+package com.wright.android.t_minus.universal_utils;
 
 import android.app.AlertDialog;
 import android.content.Context;

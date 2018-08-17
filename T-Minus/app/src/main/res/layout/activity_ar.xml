@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ar.ArActivity">
 
     <com.google.ar.sceneform.ArSceneView
@@ -11,4 +11,20 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_gravity="top"/>
+
+    <edu.arbelkilani.compass.Compass
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_margin="20dp"
+        app:border_color="@color/colorAccent"
+        app:degree_color="@color/colorAccent"
+        app:degree_value_color="@color/colorAccent"
+        app:degrees_step="5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:needle="@drawable/ic_needle"
+        app:orientation_labels_color="@android:color/white"
+        app:show_border="true"
+        app:show_degree_value="false"
+        app:show_orientation_labels="true" />
 </android.support.constraint.ConstraintLayout>

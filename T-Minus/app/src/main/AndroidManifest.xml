@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.wright.android.t_minus">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -19,19 +19,21 @@
             android:name="com.google.ar.core"
             android:value="required" />
         <meta-data
+            tools:replace="android:value"
+            android:name="android.support.VERSION"
+            android:value="26.1.0" />
+        <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyB7nsw3Zy_anC3RtsbY4babMXeB0GaHf54" />
 
         <service android:name=".notifications.NotifService" />
         <service android:name=".notifications.ShowNotificationService" />
 
-        <activity android:name=".OnBoardingActivity"
+        <activity
+            android:name=".OnBoardingActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -40,13 +42,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".MainTabbedActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
-
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".main_tabs.manifest.ManifestDetailsActivity"
             android:screenOrientation="portrait" />
@@ -67,6 +66,9 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
+
+        <activity android:name=".main_tabs.photos.PhotoCaptureDetailActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

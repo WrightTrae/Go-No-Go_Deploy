@@ -20,12 +20,14 @@ import android.view.Window;
 import android.widget.Toast;
 
 import com.google.ar.core.Frame;
+import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
 import com.google.ar.core.exceptions.CameraNotAvailableException;
 import com.google.ar.core.exceptions.UnavailableException;
 import com.google.ar.sceneform.ArSceneView;
 import com.google.ar.sceneform.Node;
+import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.wright.android.t_minus.R;
 import com.wright.android.t_minus.objects.LaunchPad;
@@ -62,7 +64,7 @@ public class ArActivity extends AppCompatActivity {
         if(getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
-            getSupportActionBar().setTitle("");
+            getSupportActionBar().setTitle("Launch Pad Finder");
         }
         launchPads = new ArrayList<>();
         if(getIntent().hasExtra(ARG_LAUNCH_PAD)){
@@ -104,7 +106,7 @@ public class ArActivity extends AppCompatActivity {
 
             onboardDialog.setOnDismissListener((DialogInterface dialog) ->
                     handler.removeCallbacks(runnable));
-            handler.postDelayed(runnable, 10000);
+            handler.postDelayed(runnable, 8000);
 
 ////            SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
 ////            SharedPreferences.Editor editor = sharedPref.edit();
@@ -136,11 +138,15 @@ public class ArActivity extends AppCompatActivity {
 
         arSceneView
                 .getScene()
-                .setOnUpdateListener(
+                .addOnUpdateListener(
                         frameTime -> {
                             if (loadingMessageSnackbar == null) {
                                 return;
                             }
+
+                            Node node = new Node();
+                            node.setWorldPosition(new Vector3(20,1,2));
+                            arSceneView.getScene().addChild(node);
 
                             Frame frame = arSceneView.getArFrame();
                             if (frame == null) {
@@ -150,6 +156,8 @@ public class ArActivity extends AppCompatActivity {
                             if (frame.getCamera().getTrackingState() != TrackingState.TRACKING) {
                                 return;
                             }
+
+
                             if (locationScene == null) {
                                 locationScene = new LocationScene(this, this, arSceneView);
                                 for(LaunchPad launchPad: launchPads){
@@ -160,6 +168,7 @@ public class ArActivity extends AppCompatActivity {
                             if (locationScene != null) {
                                 hideLoadingMessage();
                                 locationScene.processFrame(arSceneView.getArFrame());
+                                locationScene.setAnchorRefreshInterval(10);
                             }
 
                         });

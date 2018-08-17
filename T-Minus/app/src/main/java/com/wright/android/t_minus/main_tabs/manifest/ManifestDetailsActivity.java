@@ -3,6 +3,7 @@ package com.wright.android.t_minus.main_tabs.manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
@@ -42,7 +43,6 @@ public class ManifestDetailsActivity extends AppCompatActivity implements GetMan
     private Manifest manifest;
     private ProgressBar progressBar;
     private NotificationHelper notificationHelper;
-    public static final int testLaunchID = 0x1101;//TODO: THIS IS FOR TESTING ONLY
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,19 +62,8 @@ public class ManifestDetailsActivity extends AppCompatActivity implements GetMan
         }
         if(getIntent().hasExtra(ARG_MANIFEST)){
             manifest = (Manifest) getIntent().getSerializableExtra(ARG_MANIFEST);
-            if(manifest.getLaunchId() == testLaunchID){
-                setTestDetails();
-            }else {
-                downloadDetails();
-            }
+            downloadDetails();
         }
-    }
-
-    private void setTestDetails(){
-        manifest.setManifestDetails(new ManifestDetails("Launch is GO", "Unknown",
-                "Test start time","Test end time","Go/No-Go",null,"TEST LAUNCH",
-                "This is a test launch created for user testing to display notifications and live launch view example."));
-        setUpUi();
     }
 
     private void handleNotificationChannel() {
@@ -172,20 +161,26 @@ public class ManifestDetailsActivity extends AppCompatActivity implements GetMan
         ((TextView)findViewById(R.id.detailsDescription)).setText(manifestDetails.getDescription());
 
         Button notifBtn = findViewById(R.id.detailsNotifBtn);
-        notifBtn.setOnClickListener((View v) -> {
-            if(manifest.getTimeDate() == null){
-                return;
-            }
-            notifBtn.setEnabled(false);
-            notifBtn.setText(getString(R.string.subscribed));
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(manifest.getTimeDate());
-            int minutes = Integer.parseInt(getSharedPreferences(PreferencesFragment.PREFS, MODE_PRIVATE).getString(PreferencesFragment.NOTIF_PREF, "30"));
-            cal.add(Calendar.MINUTE , -minutes);
-            DateFormat dateFormat = SimpleDateFormat.getDateTimeInstance();
-            Toast.makeText(this, dateFormat.format(cal.getTime()),Toast.LENGTH_SHORT).show();
-            notificationHelper.setAlarmForNotification(cal, manifest);
-        });
+
+        SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
+        if(sharedPreferences.contains(String.valueOf(manifest.getLaunchId()))){
+            disableNotificationButton(notifBtn);
+        }else {
+            notifBtn.setOnClickListener((View v) -> {
+                if (manifest.getTimeDate() == null) {
+                    return;
+                }
+                sharedPreferences.edit().putBoolean(String.valueOf(manifest.getLaunchId()), true).apply();
+                disableNotificationButton(notifBtn);
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(manifest.getTimeDate());
+                int minutes = Integer.parseInt(getSharedPreferences(PreferencesFragment.PREFS, MODE_PRIVATE).getString(PreferencesFragment.NOTIF_PREF, "30"));
+                cal.add(Calendar.MINUTE, -minutes);
+                DateFormat dateFormat = SimpleDateFormat.getDateTimeInstance();
+                Toast.makeText(this, "Notification set for: " + dateFormat.format(cal.getTime()), Toast.LENGTH_SHORT).show();
+                notificationHelper.setAlarmForNotification(cal, manifest);
+            });
+        }
 
         Button liveBtn = findViewById(R.id.detailsLiveBtn);
         if(manifestDetails.getUrl()==null){
@@ -196,6 +191,11 @@ public class ManifestDetailsActivity extends AppCompatActivity implements GetMan
                     Uri.parse(manifestDetails.getUrl()))));
         }
         progressBar.setVisibility(View.GONE);
+    }
+
+    private void disableNotificationButton(Button notifBtn){
+        notifBtn.setEnabled(false);
+        notifBtn.setText(getString(R.string.subscribed));
     }
 
     @Override

@@ -20,14 +20,14 @@ public class LoginActivity extends AppCompatActivity implements LoginListener{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_blank);
         if(getSupportActionBar()!=null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
             getSupportActionBar().setTitle("");
         }
         signupFragment = SignupFragment.newInstance();
-        getSupportFragmentManager().beginTransaction().replace(R.id.login_frame, signupFragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.blankFrame, signupFragment).commit();
     }
 
     @Override
@@ -42,9 +42,9 @@ public class LoginActivity extends AppCompatActivity implements LoginListener{
             if(loginFragment == null){
                 loginFragment = LoginFragment.newInstance();
             }
-            getSupportFragmentManager().beginTransaction().replace(R.id.login_frame, loginFragment).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.blankFrame, loginFragment).commit();
         }else if(fromFragment instanceof LoginFragment){
-            getSupportFragmentManager().beginTransaction().replace(R.id.login_frame, signupFragment).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.blankFrame, signupFragment).commit();
         }
     }
 

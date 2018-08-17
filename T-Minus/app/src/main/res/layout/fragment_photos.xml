@@ -6,11 +6,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".main_tabs.photos.PhotosFragment">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/photoGrid"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayoutPhoto"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        android:layout_height="match_parent">
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/photoGrid"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"/>
+    </android.support.v4.widget.SwipeRefreshLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/photo_capture_fab"
@@ -26,7 +31,7 @@
         android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/transparentDarkBlack">
+        android:background="@color/transparentSignInBlack">
 
         <TextView
             android:layout_width="0dp"

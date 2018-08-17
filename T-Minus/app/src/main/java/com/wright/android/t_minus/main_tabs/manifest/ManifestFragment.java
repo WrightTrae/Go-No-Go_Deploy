@@ -1,13 +1,12 @@
 package com.wright.android.t_minus.main_tabs.manifest;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +18,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.wright.android.t_minus.DialogUtils;
+import com.paginate.Paginate;
+import com.wright.android.t_minus.universal_utils.DialogUtils;
 import com.wright.android.t_minus.network_connection.GetAgencyUrlAPI;
 import com.wright.android.t_minus.network_connection.GetManifestsFromAPI;
 import com.wright.android.t_minus.network_connection.NetworkUtils;
@@ -28,13 +28,20 @@ import com.wright.android.t_minus.objects.Manifest;
 import com.wright.android.t_minus.R;
 import com.wright.android.t_minus.objects.PadLocation;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 
 public class ManifestFragment extends Fragment implements ListView.OnItemClickListener, GetAgencyUrlAPI.OnFinished, GetManifestsFromAPI.OnFinished{
 
-    private Manifest[] manifests;
     private DatabaseReference mDatabaseRef;
+    private int manifestOffset = -10;
+    private boolean isLoading;
+    private ManifestListAdapter manifestListAdapter;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     public ManifestFragment() {
         // Required empty public constructor
@@ -55,13 +62,43 @@ public class ManifestFragment extends Fragment implements ListView.OnItemClickLi
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        downloadManifests();
+        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayoutManifest);
+        swipeRefreshLayout.setOnRefreshListener(()->{
+            manifestOffset = -10;
+            manifestListAdapter.resetData();
+        });
+        ListView manifestListView = getView().findViewById(R.id.manifestList);
+        manifestListAdapter = new ManifestListAdapter(getContext(), new ArrayList<>());
+        manifestListView.setAdapter(manifestListAdapter);
+        Paginate.Callbacks callbacks = new Paginate.Callbacks() {
+            @Override
+            public void onLoadMore() {
+                // Load next page of data (e.g. network or database)
+                manifestOffset += 10;
+                downloadManifests();
+            }
+
+            @Override
+            public boolean isLoading() {
+                // Indicate whether new page loading is in progress or not
+                return isLoading;
+            }
+
+            @Override
+            public boolean hasLoadedAllItems() {
+                // Indicate whether all data (pages) are loaded or not
+                return manifestOffset>100;
+            }
+        };
+        Paginate.with(manifestListView, callbacks)
+                .build();
+        manifestListView.setOnItemClickListener(this);
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Intent intent = new Intent(getContext(), ManifestDetailsActivity.class);
-        intent.putExtra(ManifestDetailsActivity.ARG_MANIFEST, manifests[position]);
+        intent.putExtra(ManifestDetailsActivity.ARG_MANIFEST, (Manifest)manifestListAdapter.getItem(position));
         startActivity(intent);
     }
 
@@ -74,7 +111,14 @@ public class ManifestFragment extends Fragment implements ListView.OnItemClickLi
             return;
         }
         if(NetworkUtils.isConnected(getContext())){
-            new GetManifestsFromAPI(this).execute();
+            isLoading = true;
+            Calendar calendar = Calendar.getInstance();
+            Date currentDate = calendar.getTime();
+            calendar.add(Calendar.YEAR, 1);
+            Date yearAdvanceDate = calendar.getTime();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            new GetManifestsFromAPI(this, manifestOffset, 10).execute(
+                    simpleDateFormat.format(currentDate),simpleDateFormat.format(yearAdvanceDate));
         }else{
             Snackbar.make(getView(), "No internet connection", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Reload", (View v) -> downloadManifests()).show();
@@ -82,7 +126,7 @@ public class ManifestFragment extends Fragment implements ListView.OnItemClickLi
     }
 
     @Override
-    public void onManifestFinished(Manifest[] _manifests) {
+    public void onManifestFinished(ArrayList<Manifest> _manifests) {
         ArrayList<PadLocation> padLocations = new ArrayList<>();
         for(Manifest manifest:_manifests){
             if(manifest.getPadLocation() == null){
@@ -93,7 +137,7 @@ public class ManifestFragment extends Fragment implements ListView.OnItemClickLi
             }
         }
         checkIfPadLocationExist(padLocations);
-        setData(_manifests);
+        addData(_manifests);
     }
 
     private boolean containsName(final ArrayList<PadLocation> list, final int name){
@@ -166,6 +210,9 @@ public class ManifestFragment extends Fragment implements ListView.OnItemClickLi
     }
 
     private void updateFirebasePad(LaunchPad launchPad){
+        if(launchPad.getLatitude() == 0||launchPad.getLongitude()==0){
+            return;
+        }
         HashMap<String, Object> padMap = new HashMap<>();
         padMap.put("latitude", launchPad.getLatitude());
         padMap.put("longitude", launchPad.getLongitude());
@@ -176,7 +223,7 @@ public class ManifestFragment extends Fragment implements ListView.OnItemClickLi
     }
 
 
-    private void setData(Manifest[] _manifests){
+    private void addData(ArrayList<Manifest> _manifests){
         if(getContext() == null){
             return;
         }
@@ -184,11 +231,10 @@ public class ManifestFragment extends Fragment implements ListView.OnItemClickLi
             DialogUtils.showUnexpectedError(getContext());
             return;
         }
-        manifests = _manifests;
-        downloadAgencyLogo();
+        downloadAgencyLogo(_manifests);
     }
 
-    private void downloadAgencyLogo(){
+    private void downloadAgencyLogo(ArrayList<Manifest> manifests){
         if(getContext() == null){
             return;
         }
@@ -200,17 +246,16 @@ public class ManifestFragment extends Fragment implements ListView.OnItemClickLi
             new GetAgencyUrlAPI(this, manifests).execute();
         }else{
             Snackbar.make(getView(), "No internet connection", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("Reload", (View v) -> downloadAgencyLogo()).show();
+                    .setAction("Reload", (View v) -> downloadAgencyLogo(manifests)).show();
         }
     }
 
     @Override
-    public void onAgencyFinished(Manifest[] _manifests) {//downloadAgencyLogo Finish
-        manifests = _manifests;
-        getView().findViewById(R.id.manifestProgressBar).setVisibility(View.GONE);
-        ListView listView = getView().findViewById(R.id.manifestList);
-        ManifestListAdapter manifestListAdapter = new ManifestListAdapter(getContext(), manifests);
-        listView.setAdapter(manifestListAdapter);
-        listView.setOnItemClickListener(this);
+    public void onAgencyFinished(ArrayList<Manifest> _manifests) {//downloadAgencyLogo Finish
+        manifestListAdapter.updateData(_manifests);
+        if(swipeRefreshLayout.isRefreshing()){
+            swipeRefreshLayout.setRefreshing(false);
+        }
+        isLoading = false;
     }
 }

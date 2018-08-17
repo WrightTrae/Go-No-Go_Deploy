@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,8 +18,7 @@ import android.widget.LinearLayout;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
-import com.google.firebase.auth.FirebaseUser;
-import com.wright.android.t_minus.TextFieldUtils;
+import com.wright.android.t_minus.universal_utils.TextFieldUtils;
 import com.wright.android.t_minus.R;
 
 public class LoginFragment extends Fragment {
@@ -94,7 +92,7 @@ public class LoginFragment extends Fragment {
             alertDialogBuilder.create().show();
         });
 
-        mProgressView = view.getRootView().findViewById(R.id.email_login_progress);
+        mProgressView = view.getRootView().findViewById(R.id.blankProgressBar);
     }
 
     @Override
@@ -104,7 +102,7 @@ public class LoginFragment extends Fragment {
             mListener = (LoginListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement OnFragmentUploadListener");
         }
     }
 

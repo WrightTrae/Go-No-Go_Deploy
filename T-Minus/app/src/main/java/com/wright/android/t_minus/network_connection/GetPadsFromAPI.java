@@ -26,7 +26,7 @@ public class GetPadsFromAPI extends AsyncTask<String, Void, ArrayList<LaunchPad>
 
     @Override
     protected ArrayList<LaunchPad> doInBackground(String... _params) {
-        return parseJSON(NetworkUtils.getNetworkData("https://launchlibrary.net/1.3/pad?locationid="+_params[0]));
+        return parseJSON(NetworkUtils.getNetworkData("https://launchlibrary.net/1.4/pad"));
     }
 
     private ArrayList<LaunchPad> parseJSON(String api){

@@ -20,38 +20,34 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 
-public class GetManifestsFromAPI extends AsyncTask<String, Void, Manifest[]> {
+public class GetManifestsFromAPI extends AsyncTask<String, Void, ArrayList<Manifest>> {
     final private OnFinished mFinishedInterface;
+    final private int offset;
+    final private int limit;
 
 
     public interface OnFinished {
-        void onManifestFinished(Manifest[] _manifests);
+        void onManifestFinished(ArrayList<Manifest> _manifests);
     }
 
-    public GetManifestsFromAPI(OnFinished _finished) {
+    public GetManifestsFromAPI(OnFinished _finished, int _offset, int _limit) {
         mFinishedInterface = _finished;
+        offset =_offset;
+        limit = _limit;
     }
 
     @Override
-    protected Manifest[] doInBackground(String... _params) {
-        ArrayList<Manifest> ManifestArrayList = parseJSON(NetworkUtils.getNetworkData("https://launchlibrary.net/1.3/launch?next=50&mode=verbose"));
-        return ManifestArrayList.toArray(new Manifest[ManifestArrayList.size()]);
+    protected ArrayList<Manifest> doInBackground(String... _params) {
+        ArrayList<Manifest> manifestArrayList = parseJSON(NetworkUtils.getNetworkData("https://launchlibrary.net/1.4/launch?mode=verbose&" +
+                "offset="+offset+
+                "&limit="+limit+
+                "&startdate="+_params[0]+
+                "&enddate="+_params[1]));
+        return manifestArrayList;
     }
 
     private ArrayList<Manifest> parseJSON(String api){
         ArrayList<Manifest> ManifestArrayList = new ArrayList<>();
-
-
-        //TODO: Test Manifest
-        SimpleDateFormat testdf = new SimpleDateFormat("MMM dd, yyyy hh:mm a",Locale.getDefault());
-        testdf.setTimeZone(TimeZone.getDefault());
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MINUTE, 60);
-        String testFormattedDate = testdf.format(calendar.getTime());
-        ManifestArrayList.add(new Manifest(ManifestDetailsActivity.testLaunchID, "Go/No-Go Test Launch", testFormattedDate,
-                "https://s3.amazonaws.com/launchlibrary/RocketImages/placeholder_1920.png", null,null, null));
-
-
         try {
             JSONObject response = new JSONObject(api);
             JSONArray hitsJson = response.getJSONArray("launches");
@@ -77,12 +73,16 @@ public class GetManifestsFromAPI extends AsyncTask<String, Void, Manifest[]> {
                 if(imageURL.equals("https://s3.amazonaws.com/launchlibrary/RocketImages/placeholder_1920.png")){
                     imageURL = null;
                 }
-                JSONArray agencyArray = rocketObj.getJSONArray("agencies");
+
                 String agencyURL = null;
                 String agencyName = null;
-                if(agencyArray.length() > 0){
-                    agencyURL = agencyArray.getJSONObject(0).getString("infoURL");
-                    agencyName = agencyArray.getJSONObject(0).getString("name");
+
+                if(!rocketObj.isNull("agencies")) {
+                    JSONArray agencyArray = rocketObj.getJSONArray("agencies");
+                    if (agencyArray.length() > 0) {
+                        agencyURL = agencyArray.getJSONObject(0).getString("infoURL");
+                        agencyName = agencyArray.getJSONObject(0).getString("name");
+                    }
                 }
 
                 JSONArray padsArrayJSON = locationObj.getJSONArray("pads");
@@ -109,7 +109,7 @@ public class GetManifestsFromAPI extends AsyncTask<String, Void, Manifest[]> {
     }
 
     @Override
-    protected void onPostExecute(Manifest[] _result) {
+    protected void onPostExecute(ArrayList<Manifest> _result) {
         super.onPostExecute(_result);
         // Update the UI
         if (_result != null) {

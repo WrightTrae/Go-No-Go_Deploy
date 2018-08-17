@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,7 +21,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
-import com.wright.android.t_minus.TextFieldUtils;
+import com.wright.android.t_minus.universal_utils.TextFieldUtils;
 import com.wright.android.t_minus.R;
 
 import java.util.Objects;
@@ -78,7 +77,7 @@ public class SignupFragment extends Fragment {
 
         view.findViewById(R.id.signup_register).setOnClickListener((v)-> attemptSignIn());
         view.findViewById(R.id.signup_email_sign_in_button).setOnClickListener((v)->mListener.OperationSwitch(this));
-        mProgressView = view.getRootView().findViewById(R.id.email_login_progress);
+        mProgressView = view.getRootView().findViewById(R.id.blankProgressBar);
     }
 
     @Override
@@ -88,7 +87,7 @@ public class SignupFragment extends Fragment {
             mListener = (LoginListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement OnFragmentUploadListener");
         }
     }
 

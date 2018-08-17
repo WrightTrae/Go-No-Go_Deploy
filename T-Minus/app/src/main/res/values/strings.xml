@@ -63,4 +63,6 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="photos">Photos</string>
+    <string name="location">Location:</string>
+    <string name="launch_name">Launch Name:</string>
 </resources>

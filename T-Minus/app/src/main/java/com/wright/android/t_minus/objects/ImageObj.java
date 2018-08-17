@@ -3,20 +3,28 @@ package com.wright.android.t_minus.objects;
 public class ImageObj {
     private final String id;
     private final String path;
-    private String downloadUrl;
+    private String downloadUrl;//
     private long likes;
     private final boolean reported;
     private final String time_stamp;
-    private Boolean liked;
+    private Boolean liked;//
     private final String userId;
+    private final String locationName;
 
-    public ImageObj(String id, String path, long likes, boolean reported, String time_stamp, String userId) {
+
+    public ImageObj(String id, String path, long likes, boolean reported, String time_stamp, String userId, String locationName, boolean liked) {
         this.id = id;
         this.path = path;
         this.likes = likes;
         this.reported = reported;
         this.time_stamp = time_stamp;
         this.userId = userId;
+        this.locationName = locationName;
+        this.liked = liked;
+    }
+
+    public String getLocationName() {
+        return locationName;
     }
 
     public String getId() {
