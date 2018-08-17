@@ -466,7 +466,7 @@ public class PhotosFragment extends Fragment {
                     });
         }
     }
-
+//
     private void addImageUrlToDatabase(String stringUri, String locationName){
         if(checkForSignIn(true)) {
             HashMap<String, Object> imageMap = new HashMap<>();
