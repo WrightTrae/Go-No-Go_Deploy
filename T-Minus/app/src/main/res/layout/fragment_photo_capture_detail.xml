@@ -9,6 +9,7 @@
 
     <ImageView
         android:id="@+id/photo_detail_preview"
+        android:contentDescription="@string/your_image_preview"
         android:layout_width="wrap_content"
         android:layout_height="150dp"
         android:layout_marginEnd="20dp"
@@ -38,7 +39,7 @@
         android:layout_marginEnd="20dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="32dp"
-        android:text="Please only post images of or from rocket launches. All images not envoling rockets may be removed."
+        android:text="@string/please_only_post_images_of_or_from_rocket_launches_all_images_not_envoling_rockets_may_be_removed"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -53,7 +54,7 @@
         android:layout_marginStart="8dp"
         android:ems="10"
         android:inputType="textPersonName"
-        android:hint="City, State"
+        android:hint="@string/photo_capture_location_hint"
         app:layout_constraintBottom_toBottomOf="@+id/photo_detail_location_static"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/photo_detail_location_static"
@@ -65,7 +66,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
-        android:text="upload image"
+        android:text="@string/upload_image"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

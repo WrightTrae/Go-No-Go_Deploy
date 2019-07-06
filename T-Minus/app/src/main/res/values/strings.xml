@@ -60,9 +60,24 @@
     <string name="explore_your_surroundings">Explore Your Surroundings</string>
     <string name="welcome_to_the_launch_pad_locatorlook_around_to_view_the_launch_pad_s_that_are_near_you_you_can_click_on_a_launch_pad_to_get_the_name_of_the_pad">Look around to discover the launch pad(s) around you. You can click on a launch pad to get the name of the pad.</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="photos">Photos</string>
     <string name="location">Location:</string>
     <string name="launch_name">Launch Name:</string>
+    <string name="re_type_password">Re-type Password</string>
+    <string name="your_image_preview">Your Image Preview</string>
+    <string name="thumbs_up">Thumbs up</string>
+    <string name="live_image">Live Image</string>
+    <string name="go_no_go_logo">Go/No-Go Logo</string>
+    <string name="image">Image</string>
+    <string name="please_only_post_images_of_or_from_rocket_launches_all_images_not_envoling_rockets_may_be_removed">Please only post images of or from rocket launches. All images not envoling rockets may be removed.</string>
+    <string name="photo_capture_location_hint">City, State</string>
+    <string name="upload_image">upload image</string>
+    <string name="account_needed">ACCOUNT NEEDED</string>
+    <string name="you_have_to_be_signed_in_to_view_or_add_photos_from_your_favorite_rocket_launches_click_the_button_bellow_to_sign_in_and_start_adding_to_the_community">You have to be signed in to view or add photos from your favorite rocket launches. Click the button bellow to sign in and start adding to the community.</string>
+    <string name="current_password">Current Password</string>
+    <string name="new_password">New Password</string>
+    <string name="re_type_new_password">Re-type New Password</string>
+    <string name="save">Save</string>
+    <string name="report">Report</string>
+    <string name="forgot_password">Forgot Password?</string>
 </resources>

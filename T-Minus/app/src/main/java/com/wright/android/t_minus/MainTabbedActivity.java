@@ -1,13 +1,10 @@
 package com.wright.android.t_minus;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -16,85 +13,39 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.animation.DecelerateInterpolator;
-import android.widget.ImageView;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.wright.android.t_minus.main_tabs.launchpad.LaunchPadFragment;
 import com.wright.android.t_minus.main_tabs.manifest.ManifestFragment;
 import com.wright.android.t_minus.main_tabs.photos.PhotosFragment;
-import com.wright.android.t_minus.objects.LaunchPad;
-import com.wright.android.t_minus.objects.Manifest;
-import com.wright.android.t_minus.objects.PadLocation;
 import com.wright.android.t_minus.settings.PreferencesActivity;
-import com.wright.android.t_minus.network_connection.GetManifestsFromAPI;
-import com.wright.android.t_minus.network_connection.NetworkUtils;
-
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.wright.android.t_minus.settings.PreferencesFragment;
 
 public class MainTabbedActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener{
     private LaunchPadFragment launchPadFragment;
     private ManifestFragment manifestFragment;
     private PhotosFragment photosFragment;
     private ViewPager mMainViewPager;
+    private SharedPreferences sharedPreferences;
+    public static final String AD_FREE_MODE = "SharedPreferences.AD_FREE_MODE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sharedPreferences = getSharedPreferences(PreferencesFragment.PREFS, MODE_PRIVATE);
+        if(!sharedPreferences.getBoolean(OnBoardingActivity.loginScreen, false)){
+            startActivity(new Intent(this, OnBoardingActivity.class));
+            finish();
+            return;
+        }
         setContentView(R.layout.activity_main_tabbed);
         mMainViewPager = findViewById(R.id.container);
-
-        //MobileAds.initialize(this, "ca-app-pub-9162158259171878~9059604120");
-
-//        AdView mAdView = findViewById(R.id.adView);
-//
-//        AdRequest adRequest = new AdRequest.Builder().build();
-//        mAdView.setAdListener(new AdListener() {
-//            @Override
-//            public void onAdLoaded() {
-//                // Code to be executed when an ad finishes loading.
-//                mMainViewPager.setPadding(0,0,0, mAdView.getHeight());
-//            }
-//
-//            @Override
-//            public void onAdFailedToLoad(int errorCode) {
-//                // Code to be executed when an ad request fails.
-//                mMainViewPager.setPadding(0,0,0, 0);
-//            }
-//
-//            @Override
-//            public void onAdOpened() {
-//                // Code to be executed when an ad opens an overlay that
-//                // covers the screen.
-//            }
-//
-//            @Override
-//            public void onAdLeftApplication() {
-//                // Code to be executed when the user has left the app.
-//            }
-//
-//            @Override
-//            public void onAdClosed() {
-//                // Code to be executed when when the user is about to return
-//                // to the app after tapping on an ad.
-//            }
-//        });
-//        mAdView.loadAd(adRequest);
-
+        InitializeAds();
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
@@ -120,10 +71,45 @@ public class MainTabbedActivity extends AppCompatActivity implements TabLayout.O
 
     }
 
-//    public int dpToPx(int dp) {
-//        DisplayMetrics displayMetrics = this.getResources().getDisplayMetrics();
-//        return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
-//    }
+    private void InitializeAds(){
+        if(!sharedPreferences.getBoolean(AD_FREE_MODE, false)){
+            MobileAds.initialize(this, "ca-app-pub-9162158259171878~9059604120");
+
+            AdView mAdView = findViewById(R.id.adView);
+
+            AdRequest adRequest = new AdRequest.Builder().build();
+            mAdView.setAdListener(new AdListener() {
+                @Override
+                public void onAdLoaded() {
+                    mMainViewPager.setPadding(0,0,0,200);
+                }
+
+                @Override
+                public void onAdFailedToLoad(int errorCode) {
+                    // Code to be executed when an ad request fails.
+                    mMainViewPager.setPadding(0,0,0, 0);
+                }
+
+                @Override
+                public void onAdOpened() {
+                    // Code to be executed when an ad opens an overlay that
+                    // covers the screen.
+                }
+
+                @Override
+                public void onAdLeftApplication() {
+                    // Code to be executed when the user has left the app.
+                }
+
+                @Override
+                public void onAdClosed() {
+                    // Code to be executed when when the user is about to return
+                    // to the app after tapping on an ad.
+                }
+            });
+            mAdView.loadAd(adRequest);
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {/////////////////Setup UI\\\\\\\\\\\\\\\\\\\\

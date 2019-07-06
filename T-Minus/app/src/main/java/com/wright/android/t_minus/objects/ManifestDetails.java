@@ -14,7 +14,11 @@ public class ManifestDetails implements Serializable {
 
     public ManifestDetails(String status, String probability, String windowStart, String windowEnd, String missionProvider, String url, String type, String description) {
         this.status = status;
-        this.probability = probability;
+        if(probability.equals("-1")){
+            this.probability = "Unknown";
+        }else {
+            this.probability = probability;
+        }
         this.windowStart = windowStart;
         this.windowEnd = windowEnd;
         this.missionProvider = missionProvider;

@@ -6,6 +6,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <ImageView
         xmlns:android="http://schemas.android.com/apk/res/android"
+        android:contentDescription="@string/image"
         android:id="@+id/popup_image"
         android:src="@drawable/logo_outline"
         android:layout_width="wrap_content"
@@ -20,5 +21,5 @@
         android:layout_marginTop="10dp"
         android:layout_marginBottom="5dp"
         style="@style/buttonStyle.secondary"
-        android:text="Report" />
+        android:text="@string/report" />
 </LinearLayout>

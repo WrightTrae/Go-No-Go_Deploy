@@ -13,7 +13,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 
-import com.google.firebase.auth.FirebaseAuth;
+import com.wright.android.t_minus.settings.PreferencesFragment;
 import com.wright.android.t_minus.settings.account.LoginActivity;
 
 public class OnBoardingActivity extends AppCompatActivity {
@@ -21,7 +21,7 @@ public class OnBoardingActivity extends AppCompatActivity {
     public static final int ANIM_ITEM_DURATION = 1000;
     public static final int ITEM_DELAY = 300;
     public static final String loginScreen = "loginScreen";
-
+    private SharedPreferences sharedPreferences;
     private boolean animationStarted = false;
 
     @Override
@@ -30,45 +30,39 @@ public class OnBoardingActivity extends AppCompatActivity {
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_on_boarding);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
-        if(FirebaseAuth.getInstance().getCurrentUser() != null||sharedPreferences.contains(loginScreen)){
-            finish();
-            Intent intent = new Intent(getApplicationContext(), MainTabbedActivity.class);
-            startActivity(intent);
-        }
+        sharedPreferences = getSharedPreferences(PreferencesFragment.PREFS, MODE_PRIVATE);
     }
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
-
         if (!hasFocus || animationStarted) {
             return;
         }
-
         animate();
+        super.onWindowFocusChanged(true);
+    }
 
-        super.onWindowFocusChanged(hasFocus);
+    private void changeLogin(){
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(loginScreen, true);
+        editor.apply();
     }
 
     private void animate() {
-        ImageView logoImageView = (ImageView) findViewById(R.id.img_logo);
-        ViewGroup container = (ViewGroup) findViewById(R.id.container);
+        ImageView logoImageView = findViewById(R.id.img_logo);
+        ViewGroup container = findViewById(R.id.container);
         findViewById(R.id.on_board_sign_in).setOnClickListener((View v)-> {
-            getPreferences(MODE_PRIVATE).edit().putBoolean(loginScreen, true).apply();
+            changeLogin();
             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(intent);
+            finish();
         });
         findViewById(R.id.on_board_skip).setOnClickListener((View v)-> {
-            getPreferences(MODE_PRIVATE).edit().putBoolean(loginScreen, true).apply();
+            changeLogin();
             Intent intent = new Intent(getApplicationContext(), MainTabbedActivity.class);
             startActivity(intent);
+            finish();
         });
-
 
         ViewCompat.animate(logoImageView)
                 .translationY(-300)

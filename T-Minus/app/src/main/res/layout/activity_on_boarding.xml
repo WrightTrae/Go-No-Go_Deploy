@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?colorPrimary"
+    android:background="@color/colorPrimary"
     android:orientation="vertical"
     >
 
@@ -19,6 +19,7 @@
         >
 
         <TextView
+            android:id="@+id/on_board_header"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -71,6 +72,7 @@
     </LinearLayout>
 
     <ImageView
+        android:contentDescription="@string/go_no_go_logo"
         android:id="@+id/img_logo"
         android:layout_width="150dp"
         android:layout_height="150dp"

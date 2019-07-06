@@ -18,12 +18,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
 import com.wright.android.t_minus.R;
 import com.wright.android.t_minus.universal_utils.TextFieldUtils;
 import com.wright.android.t_minus.network_connection.NetworkUtils;
 import com.wright.android.t_minus.settings.account.LoginActivity;
+
+import java.util.HashMap;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -33,7 +37,6 @@ public class PreferencesFragment extends PreferenceFragment {
     public static final String PASSWORD_PREF = "password_pref";
     public static final String EMAIL_PREF = "email_pref";
     public static final int LOG_IN_CODE = 0x0010;
-    public static final int APPLY_BUSINESS_CODE = 0x0100;
     private String dateFormat;
     private PreferencesActivity mActivity;
     private FirebaseAuth mAuth;
@@ -191,13 +194,18 @@ public class PreferencesFragment extends PreferenceFragment {
             switch (preference.getKey()){
                 case NOTIF_PREF:
                     dateFormat = newValue.toString();
+                    //TODO FIX DATE CHANGES
                     break;
                 case EMAIL_PREF:
                     String email = (String) newValue;
                     if(mAuth.getCurrentUser()!=null){
                         if(TextFieldUtils.isEmailValid(email)) {
-                            mAuth.getCurrentUser().updateEmail(email);
-                            Toast.makeText(getContext(), "Email successfully changed.", Toast.LENGTH_SHORT).show();
+                            mAuth.getCurrentUser().updateEmail(email).addOnCompleteListener((@NonNull Task<Void> task) -> {
+                                HashMap<String, Object> userMap = new HashMap<>();
+                                userMap.put("email", email);
+                                FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid()).updateChildren(userMap);
+                                Toast.makeText(getContext(), "Email successfully changed.", Toast.LENGTH_SHORT).show();
+                            });
                         }else {
                             Toast.makeText(getContext(), "Email entered was not valid.", Toast.LENGTH_SHORT).show();
                             return false;

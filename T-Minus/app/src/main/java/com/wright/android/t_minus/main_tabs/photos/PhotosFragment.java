@@ -2,25 +2,18 @@ package com.wright.android.t_minus.main_tabs.photos;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.renderscript.RenderScript;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -52,13 +45,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Objects;
 
 public class PhotosFragment extends Fragment {
-//TODO:RE ADD LIKES
     public static final int MY_CAMERA_PERMISSION_CODE = 1231;
     public static final int CAPTURE_DETAIL_REQUEST = 0x012;
     private static final String PHOTO_SPOTLIGHT = "PHOTO_SPOTLIGHT";
@@ -84,8 +74,9 @@ public class PhotosFragment extends Fragment {
     private DatabaseReference activeImageDatabaseReference;
     private ArrayList<ImageObj>imageObjArrayList = new ArrayList<>();
     private int photoDownloadOffset;
-    private final int offsetRate = 5;
-    private boolean initalDownload = true;
+    private final int offsetRate = 10;
+    private boolean initialDownload = true;
+    private Paginate paginate;
 
     public PhotosFragment() {
         // Required empty public constructor
@@ -100,13 +91,18 @@ public class PhotosFragment extends Fragment {
         super.onResume();
         if(checkForSignIn(false)){
             if(!imagesDownloaded) {
-                if (!initalDownload){
+                if (!initialDownload){
+                    initialDownload = true;
                     getLikedImages();
                     imagesDownloaded = true;
                 }
             }
         }else{
             imagesDownloaded = false;
+            imageObjArrayList.clear();
+            if(photoAdapter != null){
+                photoAdapter.resetData();
+            }
         }
     }
 
@@ -114,26 +110,28 @@ public class PhotosFragment extends Fragment {
         if(getActivity() == null || getContext() == null){
             return;
         }
-        new SpotlightView.Builder(getActivity())
-                .introAnimationDuration(400)
-                .enableRevealAnimation(true)
-                .performClick(true)
-                .fadeinTextDuration(400)
-                .headingTvColor(getContext().getColor(R.color.colorAccent))
-                .headingTvSize(20)
-                .headingTvText("Take A Photo")
-                .subHeadingTvColor(Color.parseColor("#ffffff"))
-                .subHeadingTvSize(15)
-                .subHeadingTvText("This is used to take a photo of a rocket launch to share with your fellow rocket enthusiasts.")
-                .maskColor(Color.parseColor("#dc000000"))
-                .target(fab)
-                .lineAnimDuration(400)
-                .lineAndArcColor(getContext().getColor(R.color.colorAccent))
-                .dismissOnTouch(true)
-                .dismissOnBackPress(true)
-                .enableDismissAfterShown(true)
-                .usageId(PHOTO_SPOTLIGHT)
-                .show();
+        if(checkForSignIn(false)) {
+            new SpotlightView.Builder(getActivity())
+                    .introAnimationDuration(400)
+                    .enableRevealAnimation(true)
+                    .performClick(true)
+                    .fadeinTextDuration(400)
+                    .headingTvColor(getContext().getColor(R.color.colorAccent))
+                    .headingTvSize(20)
+                    .headingTvText("Take A Photo")
+                    .subHeadingTvColor(Color.parseColor("#ffffff"))
+                    .subHeadingTvSize(15)
+                    .subHeadingTvText("This is used to take a photo of a rocket launch to share with your fellow rocket enthusiasts.")
+                    .maskColor(Color.parseColor("#dc000000"))
+                    .target(fab)
+                    .lineAnimDuration(400)
+                    .lineAndArcColor(getContext().getColor(R.color.colorAccent))
+                    .dismissOnTouch(true)
+                    .dismissOnBackPress(true)
+                    .enableDismissAfterShown(true)
+                    .usageId(PHOTO_SPOTLIGHT)
+                    .show();
+        }
     }
 
     @Override
@@ -141,7 +139,7 @@ public class PhotosFragment extends Fragment {
                              Bundle savedInstanceState) {
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
-        photoDownloadOffset = -offsetRate;
+        photoDownloadOffset = 0;
         return inflater.inflate(R.layout.fragment_photos, container, false);
     }
 
@@ -175,8 +173,11 @@ public class PhotosFragment extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(()->{
             photoAdapter.resetData();
             imageObjArrayList.clear();
-            photoDownloadOffset = -offsetRate;
-            initalDownload = true;
+            urlDownloadDoneCount = 0;
+            photoDownloadOffset = 0;
+            initialDownload = true;
+            paginate.setHasMoreDataToLoad(false);
+            getLikedImages();
         });
         recyclerView = view.findViewById(R.id.photoGrid);
         recyclerView.setLayoutManager(new CustomStaggeredViewLayout(2, StaggeredGridLayoutManager.VERTICAL));
@@ -188,6 +189,7 @@ public class PhotosFragment extends Fragment {
             resetPushPath();
             fab.setOnClickListener((View v) -> showDataFromFAB());
         }
+        getLikedImages();
 
         Paginate.Callbacks callbacks = new Paginate.Callbacks() {
             @Override
@@ -206,13 +208,10 @@ public class PhotosFragment extends Fragment {
             @Override
             public boolean hasLoadedAllItems() {
                 // Indicate whether all data (pages) are loaded or not
-                if(imageObjArrayList.size()==0){
-                    return false;
-                }
-                return urlDownloadDoneCount>=imageObjArrayList.size();
+                return imageObjArrayList.size() == 0 || urlDownloadDoneCount >= imageObjArrayList.size();
             }
         };
-        Paginate.with(recyclerView, callbacks)
+        paginate = Paginate.with(recyclerView, callbacks).addLoadingListItem(false)
                 .build();
     }
 
@@ -232,7 +231,7 @@ public class PhotosFragment extends Fragment {
                         MY_CAMERA_PERMISSION_CODE);
             } else {
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, ImageUtils.getOutputUri(getContext(), getImageFile()));
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, ImageUtils.getOutputUri(Objects.requireNonNull(getContext()), getImageFile()));
                 intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 startActivityForResult(intent, CAMERA_REQUEST);
 //                Intent intent = new Intent(getContext(), PhotoCaptureDetailActivity.class);
@@ -320,7 +319,11 @@ public class PhotosFragment extends Fragment {
             e.printStackTrace();
             return null;
         }
-        return imageFile;
+        if(created) {
+            return imageFile;
+        }else{
+            return null;
+        }
     }
 
     private void downloadImages(ArrayList<String> likedImagesIds){
@@ -328,7 +331,7 @@ public class PhotosFragment extends Fragment {
             DatabaseReference imageRef = FirebaseDatabase.getInstance().getReference().child("images");
             imageRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {//TODO: Only run this on itital downlaod/refreshing then rely on item array for url downloads\
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     int downloadedImages = 0;
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         downloadedImages++;
@@ -374,10 +377,17 @@ public class PhotosFragment extends Fragment {
     }
 
     private void getDownloadUrls(){
-        if(initalDownload){
-            initalDownload = false;
+        if(initialDownload){
+            initialDownload = false;
+            paginate.setHasMoreDataToLoad(true);
         }
-        final int limit = photoDownloadOffset + offsetRate;
+        final int limit;
+        final int offsetDifference = photoDownloadOffset + offsetRate;
+        if(offsetDifference>=imageObjArrayList.size()){
+            limit = imageObjArrayList.size();
+        }else{
+            limit = offsetDifference;
+        }
         ArrayList<ImageObj> freshImages = new ArrayList<>(imageObjArrayList.subList(photoDownloadOffset, limit));
         for(int i = 0; i<freshImages.size(); i++) {
             final int index = i;
@@ -412,10 +422,11 @@ public class PhotosFragment extends Fragment {
     private void getLikedImages(){
         if(checkForSignIn(false)) {
             swipeRefreshLayout.setRefreshing(true);
-            if (initalDownload) {
+            if (initialDownload) {
+                photoDownloadOffset = 0;
                 imageObjArrayList.clear();
                 DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference().child("users")
-                        .child(FirebaseAuth.getInstance().getUid());
+                        .child(Objects.requireNonNull(FirebaseAuth.getInstance().getUid()));
                 usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -474,12 +485,12 @@ public class PhotosFragment extends Fragment {
             imageMap.put(LOCATION_NAME_KEY, locationName);
             imageMap.put(LIKES_KEY, 0);
             imageMap.put(REPORTED_KEY, false);
-            imageMap.put(USER_ID_KEY, FirebaseAuth.getInstance().getCurrentUser().getUid());
+            imageMap.put(USER_ID_KEY, Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid());
             Calendar calendar = Calendar.getInstance();
             imageMap.put(TIME_STAMP_KEY, calendar.getTime().toString());
             activeImageDatabaseReference.setValue(imageMap);
             DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users")
-                    .child(FirebaseAuth.getInstance().getUid()).child("images");
+                    .child(Objects.requireNonNull(FirebaseAuth.getInstance().getUid())).child("images");
             HashMap<String, Object> userMap = new HashMap<>();
             userMap.put(activeImageDatabaseReference.getKey(), stringUri);
             userRef.updateChildren(userMap);

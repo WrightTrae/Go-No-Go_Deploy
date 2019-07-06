@@ -1,24 +1,22 @@
 package com.wright.android.t_minus.main_tabs.photos;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
-import android.view.Display;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import com.crowdfire.cfalertdialog.CFAlertDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -28,9 +26,9 @@ import com.squareup.picasso.Target;
 import com.wright.android.t_minus.R;
 import com.wright.android.t_minus.objects.ImageObj;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 
 public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder>{
@@ -95,7 +93,7 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder>{
                         settingsDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
                     }
                     View popup = LayoutInflater.from(mContext).inflate(R.layout.image_popup_layout, null);
-                    Picasso.get().load(getItem(selectedIndex).getDownloadUrl()).
+                    Picasso.get().load(Objects.requireNonNull(getItem(selectedIndex)).getDownloadUrl()).
                             placeholder(R.drawable.rocket_default_image).purgeable()
                             .noFade().into((ImageView)popup.findViewById(R.id.popup_image));
                     popup.findViewById(R.id.popup_image).setOnClickListener((View v) -> settingsDialog.dismiss());
@@ -126,7 +124,12 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder>{
             }
             vh.tvLikes.setText(String.valueOf(imageObj.getLikes()));
             Picasso picasso = Picasso.get();
-            picasso.load(getItem(_position).getDownloadUrl()).resize(650, 0).into(vh);
+            //get screen size for picasso image loader
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            ((Activity) mContext).getWindowManager()
+                    .getDefaultDisplay()
+                    .getMetrics(displayMetrics);
+            picasso.load(Objects.requireNonNull(getItem(_position)).getDownloadUrl()).resize(displayMetrics.widthPixels/2, 0).into(vh);
             vh.ivImage.setTag(_position);
         }
     }
@@ -152,14 +155,14 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder>{
         DatabaseReference firebaseDatabase = FirebaseDatabase.getInstance().getReference();
         ImageObj imageObj = getItem((int) vh.ivImage.getTag());
         if((Boolean)vh.likesView.getTag()){
-            imageObj.addLike();
+            Objects.requireNonNull(imageObj).addLike();
             vh.ivLikesIcon.setColorFilter(mContext.getColor(R.color.colorAccent));
             vh.likesView.setTag(false);
             HashMap<String, Object> userMap = new HashMap<>();
             userMap.put(imageObj.getId(), imageObj.getPath());
             firebaseDatabase.child("users").child(userId).child("likes").updateChildren(userMap);
         }else{
-            imageObj.removeLike();
+            Objects.requireNonNull(imageObj).removeLike();
             vh.ivLikesIcon.setColorFilter(mContext.getColor(android.R.color.white));
             vh.likesView.setTag(true);
             firebaseDatabase.child("users").child(userId).child("likes").child(imageObj.getId()).removeValue();
@@ -211,7 +214,7 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder>{
         HashMap<String, Object> imageMap = new HashMap<>();
         imageMap.put("reported", true);
         imageMap.put("reported reason", reason);
-        firebaseDatabase.child("images").child(imageObj.getId()).updateChildren(imageMap);
+        firebaseDatabase.child("images").child(Objects.requireNonNull(imageObj).getId()).updateChildren(imageMap);
         imageObjArrayList.remove(imageObj);
         notifyDataSetChanged();
     }

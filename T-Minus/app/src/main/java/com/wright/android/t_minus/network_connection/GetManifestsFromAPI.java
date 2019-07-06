@@ -2,7 +2,6 @@ package com.wright.android.t_minus.network_connection;
 
 import android.os.AsyncTask;
 
-import com.wright.android.t_minus.main_tabs.manifest.ManifestDetailsActivity;
 import com.wright.android.t_minus.objects.LaunchPad;
 import com.wright.android.t_minus.objects.Manifest;
 import com.wright.android.t_minus.objects.PadLocation;
@@ -14,7 +13,6 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -38,12 +36,11 @@ public class GetManifestsFromAPI extends AsyncTask<String, Void, ArrayList<Manif
 
     @Override
     protected ArrayList<Manifest> doInBackground(String... _params) {
-        ArrayList<Manifest> manifestArrayList = parseJSON(NetworkUtils.getNetworkData("https://launchlibrary.net/1.4/launch?mode=verbose&" +
+        return parseJSON(NetworkUtils.getNetworkData("https://launchlibrary.net/1.4/launch?mode=verbose&" +
                 "offset="+offset+
                 "&limit="+limit+
                 "&startdate="+_params[0]+
                 "&enddate="+_params[1]));
-        return manifestArrayList;
     }
 
     private ArrayList<Manifest> parseJSON(String api){

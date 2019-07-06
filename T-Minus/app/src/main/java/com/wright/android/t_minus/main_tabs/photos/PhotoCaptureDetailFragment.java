@@ -19,6 +19,7 @@ import com.wright.android.t_minus.universal_utils.ImageUtils;
 import com.wright.android.t_minus.R;
 
 import java.io.File;
+import java.util.Objects;
 
 public class PhotoCaptureDetailFragment extends Fragment {
 
@@ -62,7 +63,7 @@ public class PhotoCaptureDetailFragment extends Fragment {
         Bitmap bitmap;
         ExifInterface exif;
         try {
-            bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), ImageUtils.getOutputUri(getContext(), imageFile));
+            bitmap = MediaStore.Images.Media.getBitmap(Objects.requireNonNull(getContext()).getContentResolver(), ImageUtils.getOutputUri(getContext(), imageFile));
             exif = new ExifInterface(
                     imageFile.getAbsolutePath());
         } catch (Exception e) {
@@ -76,9 +77,7 @@ public class PhotoCaptureDetailFragment extends Fragment {
         ((ImageView)view.findViewById(R.id.photo_detail_preview)).setImageBitmap(bitmap);
 
         locationEditText = view.findViewById(R.id.photo_detail_location_name);
-        view.findViewById(R.id.photo_detail_upload_btn).setOnClickListener((View v)->{
-            mListener.onUpload(imageFile, locationEditText.getText().toString());
-        });
+        view.findViewById(R.id.photo_detail_upload_btn).setOnClickListener((View v)-> mListener.onUpload(imageFile, locationEditText.getText().toString()));
     }
 
     @Override

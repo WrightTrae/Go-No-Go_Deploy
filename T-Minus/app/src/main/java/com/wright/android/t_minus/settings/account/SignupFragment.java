@@ -27,13 +27,14 @@ import com.wright.android.t_minus.R;
 import java.util.Objects;
 
 public class SignupFragment extends Fragment {
-//TODO: Add error handling for wrong information
+    //TODO: Add error handling for wrong information
     private LoginListener mListener;
     private FirebaseAuth mAuth;
     private EditText mNameView;
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private View mProgressView;
+    private EditText mReTypePassword;
 
     public SignupFragment() {
         // Required empty public constructor
@@ -66,19 +67,27 @@ public class SignupFragment extends Fragment {
         mNameView = view.findViewById(R.id.signup_name);
         mEmailView = view.findViewById(R.id.signup_email);
         mPasswordView = view.findViewById(R.id.signup_password);
-        mPasswordView.setOnEditorActionListener((TextView textView, int id, KeyEvent keyEvent)->
-        {
-                if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
-                    attemptSignIn();
-                    return true;
-                }
-                return false;
-        });
+        mReTypePassword = view.findViewById(R.id.signup_password_retype);
+        mPasswordView.setOnEditorActionListener(passwordEditorAction);
+        mReTypePassword.setOnEditorActionListener(passwordEditorAction);
 
         view.findViewById(R.id.signup_register).setOnClickListener((v)-> attemptSignIn());
         view.findViewById(R.id.signup_email_sign_in_button).setOnClickListener((v)->mListener.OperationSwitch(this));
         mProgressView = view.getRootView().findViewById(R.id.blankProgressBar);
     }
+
+    private final TextView.OnEditorActionListener passwordEditorAction = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView v, int id, KeyEvent event) {
+            if(mReTypePassword.getText() == mPasswordView.getText()) {
+                if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
+                    attemptSignIn();
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
 
     @Override
     public void onAttach(Context context) {
@@ -96,29 +105,37 @@ public class SignupFragment extends Fragment {
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
+        mReTypePassword.setError(null);
         mNameView.setError(null);
 
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
+        String rePassword = mReTypePassword.getText().toString();
         String name = mNameView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && TextFieldUtils.isPasswordInvalid(password)) {
+        if (TextUtils.isEmpty(rePassword)) {
+            mReTypePassword.setError(getString(R.string.error_invalid_password));
+            focusView = mReTypePassword;
+            cancel = true;
+        }else if(!rePassword.equals(password)){
+            mReTypePassword.setError("The passwords do not match");
+            focusView = mReTypePassword;
+            cancel = true;
+        }
+
+        // Check for a valid password, if the user entered one.
+        if (TextUtils.isEmpty(password) && TextFieldUtils.isPasswordInvalid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
         }
 
-        // Check for a valid Name
-        if (TextUtils.isEmpty(name)) {
-            mNameView.setError(getString(R.string.error_field_required));
-            focusView = mNameView;
-            cancel = true;
-        }
+
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
             mEmailView.setError(getString(R.string.error_field_required));
@@ -127,6 +144,13 @@ public class SignupFragment extends Fragment {
         } else if (!TextFieldUtils.isEmailValid(email)) {
             mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
+            cancel = true;
+        }
+
+        // Check for a valid Name
+        if (TextUtils.isEmpty(name)) {
+            mNameView.setError(getString(R.string.error_field_required));
+            focusView = mNameView;
             cancel = true;
         }
 
@@ -151,27 +175,27 @@ public class SignupFragment extends Fragment {
             return;
         }
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(getActivity(), (@NonNull Task<AuthResult> task)-> {
-                setmProgressView(false);
-                if (task.isSuccessful()) {
-                    mListener.SignUpButton(Objects.requireNonNull(mAuth.getCurrentUser()), name);
-                } else {
-                    try
-                    {
-                        throw Objects.requireNonNull(task.getException());
-                    }
-                    catch (FirebaseAuthUserCollisionException existEmail)
-                    {
-                        if(getView() == null){
-                            return;
-                        }
-                        Snackbar.make(getView(), "Email is already in use please sign in", Snackbar.LENGTH_SHORT).
-                                setAction("Sign In", (v) -> ToSignIn()).show();
-                    }
-                    catch (Exception e)
-                    {
-                        Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
+            setmProgressView(false);
+            if (task.isSuccessful()) {
+                mListener.SignUpButton(Objects.requireNonNull(mAuth.getCurrentUser()), name);
+            } else {
+                try
+                {
+                    throw Objects.requireNonNull(task.getException());
                 }
+                catch (FirebaseAuthUserCollisionException existEmail)
+                {
+                    if(getView() == null){
+                        return;
+                    }
+                    Snackbar.make(getView(), "Email is already in use please sign in", Snackbar.LENGTH_SHORT).
+                            setAction("Sign In", (v) -> ToSignIn()).show();
+                }
+                catch (Exception e)
+                {
+                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            }
         });
     }
 

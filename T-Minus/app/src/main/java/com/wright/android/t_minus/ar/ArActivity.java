@@ -4,10 +4,11 @@ import android.Manifest;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -20,7 +21,6 @@ import android.view.Window;
 import android.widget.Toast;
 
 import com.google.ar.core.Frame;
-import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
 import com.google.ar.core.exceptions.CameraNotAvailableException;
@@ -60,59 +60,75 @@ public class ArActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ar);
-        arSceneView = findViewById(R.id.arFrameLayout);
-        if(getSupportActionBar() != null) {
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
             getSupportActionBar().setTitle("Launch Pad Finder");
         }
+        arSceneView = findViewById(R.id.arFrameLayout);
         launchPads = new ArrayList<>();
-        if(getIntent().hasExtra(ARG_LAUNCH_PAD)){
+        if (getIntent().hasExtra(ARG_LAUNCH_PAD)) {
             launchPads.add((LaunchPad) getIntent().getSerializableExtra(ARG_LAUNCH_PAD));
-        }else if(getIntent().hasExtra(ARG_ALL_LAUNCH_PADS)){
-            ArrayList<PadLocation> padLocations = (ArrayList<PadLocation>)getIntent().getSerializableExtra(ARG_ALL_LAUNCH_PADS);
-            for(PadLocation padLocation:padLocations){
+        } else if (getIntent().hasExtra(ARG_ALL_LAUNCH_PADS)) {
+            ArrayList<PadLocation> padLocations = (ArrayList<PadLocation>) getIntent().getSerializableExtra(ARG_ALL_LAUNCH_PADS);
+            for (PadLocation padLocation : padLocations) {
                 launchPads.addAll(padLocation.getLaunchPads());
             }
-        }else if(getIntent().hasExtra(ARG_MANIFEST_LAUNCH_PADS)){
-            launchPads.addAll((ArrayList<LaunchPad>)getIntent().getSerializableExtra(ARG_MANIFEST_LAUNCH_PADS));
+        } else if (getIntent().hasExtra(ARG_MANIFEST_LAUNCH_PADS)) {
+            launchPads.addAll((ArrayList<LaunchPad>) getIntent().getSerializableExtra(ARG_MANIFEST_LAUNCH_PADS));
         }
-        if(checkCameraPermission()&&checkLocationPermission()){
+
+        if (checkArPermissions()) {
             setupAr();
         }
     }
 
-    private void setupAr(){
-        SharedPreferences onBoardPrefs = getPreferences(MODE_PRIVATE);
-//        boolean shown = onBoardPrefs.getBoolean("shown", false);
-//        if(!shown) {
-            Dialog onboardDialog = new Dialog(this);
-            if (onboardDialog.getWindow() != null) {
-                onboardDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-                onboardDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+    private boolean checkArPermissions(){
+        if(checkCameraPermission()&&checkLocationPermission()){
+            if(ArUtils.checkIfLocationEnabled(this)) {
+                return true;
+            }else{
+                android.app.AlertDialog.Builder dialog = new android.app.AlertDialog.Builder(this);
+                dialog.setMessage("Location Services Is Not Enabled");
+                dialog.setPositiveButton("Turn On Location", (DialogInterface paramDialogInterface, int paramInt) -> {
+                    Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivity(myIntent);
+                });
+                dialog.setNegativeButton("Cancel", (DialogInterface paramDialogInterface, int paramInt) -> {
+                    paramDialogInterface.dismiss();
+                    finish();
+                });
+                dialog.show();
+                return false;
             }
-            View popup = LayoutInflater.from(this).inflate(R.layout.ar_onboard_popup_layout, null);
-            onboardDialog.setContentView(popup);
-            onboardDialog.setCancelable(true);
-            onboardDialog.show();
+        }else{
+            return false;
+        }
+    }
 
-            // Hide after some seconds
-            final Handler handler = new Handler();
-            final Runnable runnable = () -> {
-                if (onboardDialog.isShowing()) {
-                    onboardDialog.dismiss();
-                }
-            };
+    private void setupAr(){
+        Dialog onboardDialog = new Dialog(this);
+        if (onboardDialog.getWindow() != null) {
+            onboardDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+            onboardDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+        View popup = LayoutInflater.from(this).inflate(R.layout.ar_onboard_popup_layout, null);
+        onboardDialog.setContentView(popup);
+        onboardDialog.setCancelable(true);
+        onboardDialog.show();
 
-            onboardDialog.setOnDismissListener((DialogInterface dialog) ->
-                    handler.removeCallbacks(runnable));
-            handler.postDelayed(runnable, 8000);
+        // Hide after some seconds
+        final Handler handler = new Handler();
+        final Runnable runnable = () -> {
+            if (onboardDialog.isShowing()) {
+                onboardDialog.dismiss();
+            }
+        };
 
-////            SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-////            SharedPreferences.Editor editor = sharedPref.edit();
-////            editor.putBoolean("shown", true);
-////            editor.apply();
-//        }
+        onboardDialog.setOnDismissListener((DialogInterface dialog) ->
+                handler.removeCallbacks(runnable));
+        handler.postDelayed(runnable, 8000);
+
 
         CompletableFuture<ModelRenderable> andy = ModelRenderable.builder()
                 .setSource(this, R.raw.model)
@@ -215,14 +231,9 @@ public class ArActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
-
-            // Should we show an explanation?
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.CAMERA)) {
 
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
                 new AlertDialog.Builder(this)
                         .setTitle("Camera Permission Needed")
                         .setMessage("Please allow camera permission for AR viewer")
@@ -234,10 +245,7 @@ public class ArActivity extends AppCompatActivity {
                         })
                         .create()
                         .show();
-
-
             } else {
-                // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.CAMERA},
                         MY_PERMISSIONS_REQUEST_CAMERA);
@@ -258,9 +266,7 @@ public class ArActivity extends AppCompatActivity {
 
                     // permission was granted, yay! Do the
                     // location-related task you need to do.
-                    if (ContextCompat.checkSelfPermission(this,
-                            Manifest.permission.ACCESS_FINE_LOCATION)
-                            == PackageManager.PERMISSION_GRANTED) {
+                    if (checkArPermissions()) {
                         setupAr();
                     }
 
@@ -277,9 +283,7 @@ public class ArActivity extends AppCompatActivity {
 
                     // permission was granted, yay! Do the
                     // location-related task you need to do.
-                    if (ContextCompat.checkSelfPermission(this,
-                            Manifest.permission.CAMERA)
-                            == PackageManager.PERMISSION_GRANTED) {
+                    if (checkArPermissions()) {
                         setupAr();
                     }
 
@@ -296,6 +300,9 @@ public class ArActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if(arSceneView == null) {
+            return;
+        }
         if (arSceneView.getSession() == null) {
             // If the session wasn't created yet, don't resume rendering.
             // This can happen if ARCore needs to be updated or permissions are not granted yet.
@@ -341,7 +348,9 @@ public class ArActivity extends AppCompatActivity {
         if(locationScene!=null){
             locationScene.pause();
         }
-        arSceneView.pause();
+        if(arSceneView !=null) {
+            arSceneView.pause();
+        }
     }
 
     @Override
@@ -351,7 +360,9 @@ public class ArActivity extends AppCompatActivity {
             locationScene.pause();
             locationScene = null;
         }
-        arSceneView.destroy();
+        if(arSceneView !=null) {
+            arSceneView.destroy();
+        }
     }
 
     private Node getAndy(String name) {

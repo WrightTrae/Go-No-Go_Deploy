@@ -16,7 +16,7 @@ public class LoginActivity extends AppCompatActivity implements LoginListener{
 
     private LoginFragment loginFragment;
     private SignupFragment signupFragment;
-//TODO: Add toast messages for signing in/out successfully
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

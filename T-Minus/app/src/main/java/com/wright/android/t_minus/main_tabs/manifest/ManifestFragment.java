@@ -34,6 +34,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Objects;
 
 public class ManifestFragment extends Fragment implements ListView.OnItemClickListener, GetAgencyUrlAPI.OnFinished, GetManifestsFromAPI.OnFinished{
 
@@ -67,7 +68,7 @@ public class ManifestFragment extends Fragment implements ListView.OnItemClickLi
             manifestOffset = -10;
             manifestListAdapter.resetData();
         });
-        ListView manifestListView = getView().findViewById(R.id.manifestList);
+        ListView manifestListView = Objects.requireNonNull(getView()).findViewById(R.id.manifestList);
         manifestListAdapter = new ManifestListAdapter(getContext(), new ArrayList<>());
         manifestListView.setAdapter(manifestListAdapter);
         Paginate.Callbacks callbacks = new Paginate.Callbacks() {
