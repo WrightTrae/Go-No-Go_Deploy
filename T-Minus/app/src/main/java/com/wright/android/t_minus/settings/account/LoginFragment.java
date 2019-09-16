@@ -86,8 +86,11 @@ public class LoginFragment extends Fragment {
             alertDialogBuilder
                     .setMessage("A email will be sent to you shortly, follow the instruction to reset your password.")
                     .setCancelable(false)
-                    .setPositiveButton("reset password", (DialogInterface dialog, int id) ->
-                            mAuth.sendPasswordResetEmail(input.getText().toString()))
+                    .setPositiveButton("reset password", (DialogInterface dialog, int id) -> {
+                        if(!input.getText().toString().trim().isEmpty()) {
+                            mAuth.sendPasswordResetEmail(input.getText().toString());
+                        }
+                    })
                     .setNeutralButton("cancel", null);
             alertDialogBuilder.create().show();
         });

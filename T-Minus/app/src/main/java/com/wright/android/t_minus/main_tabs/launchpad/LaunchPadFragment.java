@@ -133,17 +133,21 @@ public class LaunchPadFragment extends Fragment implements ExpandableListView.On
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for(DataSnapshot padSnap: dataSnapshot.getChildren()){
-                    int padId = Integer.parseInt(padSnap.getKey());
+                    if(padSnap.exists() && padSnap.hasChild("latitude") && padSnap.hasChild("locationId")
+                            && padSnap.hasChild("name") && padSnap.hasChild("locationId")
+                            && padSnap.hasChild("longitude")) {
+                        int padId = Integer.parseInt(padSnap.getKey());
                         String name = (String) padSnap.child("name").getValue();
-                        double latitude = (double) padSnap.child("latitude").getValue();
+                        double latitude = getDoubleFromData(padSnap.child("latitude").getValue());
                         long locationId = (long) padSnap.child("locationId").getValue();
-                        double longitude = (double) padSnap.child("longitude").getValue();
-                        LaunchPad launchPad = new LaunchPad(padId,name,latitude,longitude,(int)locationId);
-                        for(PadLocation padLocation: padLocations){
-                            if (padLocation.getId() == launchPad.getLocationId()){
+                        double longitude = getDoubleFromData(padSnap.child("longitude").getValue());
+                        LaunchPad launchPad = new LaunchPad(padId, name, latitude, longitude, (int) locationId);
+                        for (PadLocation padLocation : padLocations) {
+                            if (padLocation.getId() == launchPad.getLocationId()) {
                                 padLocation.addLaunchPads(launchPad);
                             }
                         }
+                    }
                 }
                 setData(padLocations);
             }
@@ -153,5 +157,15 @@ public class LaunchPadFragment extends Fragment implements ExpandableListView.On
 
             }
         });
+    }
+
+    private Double getDoubleFromData(Object numObject){
+        if(numObject instanceof Long){
+            return ((Long) numObject).doubleValue();
+        }else if (numObject instanceof Double){
+            return (Double) numObject;
+        }else{
+            return null;
+        }
     }
 }
